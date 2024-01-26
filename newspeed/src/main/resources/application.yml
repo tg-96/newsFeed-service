@@ -16,3 +16,4 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
 jwt:
   secret: ${SECRET_KEY}
+  token-validity-in-seconds: 86400

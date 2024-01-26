@@ -1,25 +1,26 @@
 package com.newsfeed.entity;
 
 import com.newsfeed.common.BaseTimeEntity;
+import com.newsfeed.common.Role;
 import jakarta.annotation.Generated;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.SQLDelete;
+import lombok.*;
 
 import java.util.Set;
 
 @Entity
 @Getter
+@ToString
 @NoArgsConstructor
 public class Member extends BaseTimeEntity {
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
+    @GeneratedValue
     @Column(name = "member_id")
     private Long id;
+    private String name;
     private String email;
     private String password;
+    private String role;
     private String image;
     private String introduction;
     @OneToMany(mappedBy = "writer")
@@ -31,11 +32,16 @@ public class Member extends BaseTimeEntity {
     @OneToMany(mappedBy = "member")
     private Set<CommentLike> commentLikes; // 내가 좋아한 댓글
 
-    public Member(String email, String password, String image, String introduction) {
+   @Builder
+    public Member(String name,String email, String password,String role) {
+        this.name = name;
         this.email = email;
         this.password = password;
-        this.image = image;
-        this.introduction = introduction;
+        this.role = role;
+    }
+
+    public void changeRole(String role){
+       this.role = role;
     }
 
 }

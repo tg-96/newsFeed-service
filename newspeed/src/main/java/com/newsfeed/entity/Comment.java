@@ -13,7 +13,7 @@ import java.util.Set;
 @NoArgsConstructor
 public class Comment extends BaseTimeEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     @Column(name = "comment_id")
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
