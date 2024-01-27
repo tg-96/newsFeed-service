@@ -1,12 +1,11 @@
 package com.newsfeed.controller;
 
+import com.newsfeed.dto.JoinDto;
 import com.newsfeed.dto.MemberDto;
 import com.newsfeed.service.MemberService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,6 +21,12 @@ public class MemberController {
     @PatchMapping("/member/pwd")
     public void updatePwd(@RequestParam String password){
         memberService.updatePassword(password);
+    }
+    @PostMapping("/join")
+    public ResponseEntity<Void> join(@RequestBody JoinDto joinDto){
+        memberService.join(joinDto);
+
+        return ResponseEntity.ok().build();
     }
 
 }
