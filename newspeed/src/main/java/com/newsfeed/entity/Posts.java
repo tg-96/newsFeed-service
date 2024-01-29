@@ -29,5 +29,4 @@ public class Posts extends BaseTimeEntity {
         this.image = image;
         this.writer = writer;
     }
-
 }

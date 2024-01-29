@@ -16,12 +16,12 @@ public class Feeds extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member owner;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "post_id")
     private Posts post;
 
     public Feeds(Posts post,Member owner) {
-        this.owner = owner;
         this.post = post;
+        this.owner = owner;
     }
 }

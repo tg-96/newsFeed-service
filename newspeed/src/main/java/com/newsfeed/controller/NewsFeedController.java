@@ -24,7 +24,7 @@ public class NewsFeedController {
     private final NewsFeedService newsFeedService;
     private final MemberService memberService;
     /**
-     * path parmeter의 email을 가지는 대상을 팔로우
+     * 팔로우
      */
     @GetMapping("/follow/{email}")
     public ResponseEntity<Void> follow(@PathVariable("email") String toEmail){
@@ -44,20 +44,21 @@ public class NewsFeedController {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
         //뉴스피드 조회
-        List<FeedsDto> newFeeds = newsFeedService.getFeeds(email);
+        List<FeedsDto> newsFeeds = newsFeedService.getFeeds(email);
 
-        return newFeeds;
+        return newsFeeds;
     }
 
     /**
      * 게시글 작성
      */
     @PostMapping("/post")
-    public ResponseEntity<Void> writePost(PostsDto postsDto){
+    public ResponseEntity<Void> writePost(@RequestBody PostsDto postsDto){
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         newsFeedService.writePost(email,postsDto);
 
         return ResponseEntity.ok().build();
     }
+
 
 }

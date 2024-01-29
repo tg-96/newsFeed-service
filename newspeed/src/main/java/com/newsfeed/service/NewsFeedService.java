@@ -63,15 +63,16 @@ public class NewsFeedService {
     /**
      * 뉴스피드 조회
      */
-    @Transactional
     public List<FeedsDto> getFeeds(String email) {
         Optional<Member> member = memberRepository.findByEmail(email);
+
         // member 정보가 없으면 예외 처리
         if (member.isEmpty()) {
             throw new RuntimeException("피드를 조회할 멤버 정보가 없습니다.");
         }
+
         // 피드 조회
-        List<Feeds> feeds = feedsRepository.findByOwner(member.get());
+        List<Feeds> feeds = feedsRepository.findByOwner(member.get().getId());
 
         //feeds가 없으면 예외 처리
         if (feeds.isEmpty()) {
@@ -121,7 +122,6 @@ public class NewsFeedService {
 
         //내 팔로워들의 피드,활동에 추가
         List<Long> followerIdList = followRepository.findFollowerList(member.get().getId());
-
         followerIdList.stream().forEach(id -> {
             Optional<Member> follower = memberRepository.findById(id);
 
@@ -138,4 +138,10 @@ public class NewsFeedService {
                     .build());
         });
     }
+
+    /**
+     * 댓글 작성
+     */
+    @Transactional
+    public void writeComments(String writerEmail, )
 }

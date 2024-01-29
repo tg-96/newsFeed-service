@@ -1,17 +1,25 @@
 package com.newsfeed.service;
 
+import com.newsfeed.dto.FeedsDto;
 import com.newsfeed.dto.JoinDto;
+import com.newsfeed.dto.PostsDto;
+import com.newsfeed.entity.Activities;
 import com.newsfeed.entity.Member;
 import com.newsfeed.repository.ActivitiesRepository;
 import com.newsfeed.repository.FollowsRepository;
+import com.newsfeed.repository.PostsRepository;
 import jakarta.annotation.PostConstruct;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.event.annotation.BeforeTestMethod;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,12 +34,15 @@ class NewsFeedServiceTest {
     @Autowired
     ActivitiesRepository activitiesRepository;
     @Autowired
-    MemberService joinService;
+    static MemberService joinService;
     @Autowired
     MemberService memberService;
+    @Autowired
+    PostsRepository postsRepository;
 
-    @PostConstruct
-    public void init() {
+    @BeforeAll
+    public static void init(@Autowired ApplicationContext context) {
+        joinService = context.getBean(MemberService.class);
         JoinDto joinDto1 = new JoinDto();
         joinDto1.setName("율이");
         joinDto1.setRole("USER");
@@ -81,8 +92,29 @@ class NewsFeedServiceTest {
         ).isEqualTo("bbb@aaa" + "님이 " + "ccc@aaa" + "을 팔로우 했습니다.");
     }
 
-//    @Test
-//    public void 포스트_작성(){
-//        //
-//    }
+    @Test
+    public void 포스트_작성(){
+        //given
+        //팔로우 aaa->bbb
+        newsFeedService.changeFollow("aaa@aaa", "bbb@aaa");
+
+        //bbb가 post 작성
+        PostsDto postsDto = new PostsDto("포스트를 작성했습니다.",null);
+        newsFeedService.writePost("bbb@aaa",postsDto);
+        System.out.println("여기가 문제인가???");
+
+        //then
+        // 본인 피드 확인
+        List<FeedsDto> feeds1 = newsFeedService.getFeeds("bbb@aaa");
+        assertThat(feeds1.get(0).getText()).isEqualTo("포스트를 작성했습니다.");
+
+        // 팔로워 피드 확인
+        List<FeedsDto> feeds2 = newsFeedService.getFeeds("aaa@aaa");
+        assertThat(feeds2.get(0).getText()).isEqualTo("포스트를 작성했습니다.");
+
+        // 팔로우한 사람의 활동 확인
+        Member member = memberService.findMemberByEmail("aaa@aaa");
+        Optional<Activities> activities = activitiesRepository.findByOwner(member.getId());
+        assertThat(activities.get().getNotification()).isEqualTo("bbb@aaa님이 게시물을 작성 했습니다.");
+    }
 }
