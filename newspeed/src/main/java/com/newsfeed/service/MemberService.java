@@ -3,9 +3,9 @@ package com.newsfeed.service;
 import com.newsfeed.dto.JoinDto;
 import com.newsfeed.dto.MemberDto;
 import com.newsfeed.entity.Member;
+import com.newsfeed.repository.FollowsRepository;
 import com.newsfeed.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,12 +17,12 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class MemberService {
     private final MemberRepository memberRepository;
+    private final FollowsRepository followRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Transactional
-    public void updateProfile(MemberDto memberDto){
-        String name = SecurityContextHolder.getContext().getAuthentication().getName();
-        Member member = memberRepository.findByEmail(name).get();
+    public void updateProfile(MemberDto memberDto,String email){
+        Member member = memberRepository.findByEmail(email).get();
         if(memberDto.getImage() != null){
             member.changeImg(memberDto.getImage());
         }
@@ -34,9 +34,8 @@ public class MemberService {
         }
     }
     @Transactional
-    public void updatePassword(String password){
-        String name = SecurityContextHolder.getContext().getAuthentication().getName();
-        Member member = memberRepository.findByEmail(name).get();
+    public void updatePassword(String password,String email){
+        Member member = memberRepository.findByEmail(email).get();
         member.changePassword(password);
     }
 
@@ -64,8 +63,6 @@ public class MemberService {
         // 가입 진행
         Member newMember = new Member(name, email, bCryptPasswordEncoder.encode(password),role);
         memberRepository.save(newMember);
-
     }
-
 
 }

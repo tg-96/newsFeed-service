@@ -12,9 +12,13 @@ public class CommentLikes {
     @GeneratedValue
     @Column(name = "commentLike_id")
     private Long id;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_Id")
+    private Comments comments;
     private String likeUsersEmail;
 
-    public CommentLikes(String likeUsersEmail) {
+    public CommentLikes(Comments comments,String likeUsersEmail) {
+        this.comments = comments;
         this.likeUsersEmail = likeUsersEmail;
     }
 }

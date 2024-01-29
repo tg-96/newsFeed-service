@@ -13,10 +13,13 @@ public class PostLikes {
     @Id
     @Column(name = "postLike_id")
     private Long id;
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id")
+    private Posts posts;
     private String likeUsersEmail;
 
-    public PostLikes(String likeUsersEmail) {
+    public PostLikes(Posts posts, String likeUsersEmail) {
+        this.posts = posts;
         this.likeUsersEmail = likeUsersEmail;
     }
 }

@@ -13,13 +13,15 @@ public class Feeds extends BaseTimeEntity {
     @GeneratedValue
     @Column(name = "feeds_id")
     private Long id;
-    private String text;
-    private String writerEmail;
-    private String image;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member owner;
+    @OneToOne
+    @JoinColumn(name = "post_id")
+    private Posts post;
 
-    public Feeds(String text, String writerEmail, String image, Member member) {
-        this.text = text;
-        this.writerEmail = writerEmail;
-        this.image = image;
+    public Feeds(Posts post,Member member) {
+        this.owner = member;
+        this.post = post;
     }
 }

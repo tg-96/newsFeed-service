@@ -14,8 +14,8 @@ public class MailController {
 
     /**
      *
-     * @param
      * 메일보냄
+     *
      * @return
      * 인증번호
      */

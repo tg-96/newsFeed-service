@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -19,14 +21,11 @@ public class Comments extends BaseTimeEntity {
     @JoinColumn(name = "member_id")
     private Member member;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
-    private Posts post;
-    @OneToMany
-    @JoinColumn(name = "commentLike_id")
-    private Set<CommentLikes> commentLikes;
+    @JoinColumn(name = "member_id")
+    private Posts posts;
     public Comments(Member member, Posts post) {
         this.member = member;
-        this.post = post;
+        this.posts = post;
     }
-
 }
+
