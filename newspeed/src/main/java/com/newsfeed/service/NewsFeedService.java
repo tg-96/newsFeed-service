@@ -113,15 +113,6 @@ public class NewsFeedService {
         Feeds feed = new Feeds(saved_posts, member.get());
         feedsRepository.save(feed);
 
-        //내 활동에 추가
-        Activities activity = Activities.builder()
-                .member(member.get())
-                .actorEmail(writerEmail)
-                .type(ActivityType.POSTS)
-                .build();
-
-        activitiesRepository.save(activity);
-
         //내 팔로워들의 피드,활동에 추가
         List<Long> followerIdList = followRepository.findFollowerList(member.get().getId());
         followerIdList.stream().forEach(id -> {
@@ -174,7 +165,7 @@ public class NewsFeedService {
         Member postOwner = post.get().getWriter();
         Activities activities = new Activities(postOwner,ActivityType.POSTS,writerEmail,null);
 
-        String notification = writer.get().getName()+"님이 게시물에 댓글을 달았습니다.";
+        String notification = writer.get().getEmail()+"님이 내 게시물에 댓글을 달았습니다.";
 
         activities.changeNotification(notification);
         activitiesRepository.save(activities);

@@ -90,8 +90,8 @@ class NewsFeedServiceTest {
         Member aaa = memberService.findMemberByEmail("aaa@aaa");
 
         assertThat(
-                activitiesRepository.findByOwner(aaa.getId())
-                        .get()
+                activitiesRepository.findByOwnerId(aaa.getId())
+                        .get(0)
                         .getNotification()
         ).isEqualTo("bbb@aaa" + "님이 " + "ccc@aaa" + "을 팔로우 했습니다.");
     }
@@ -117,8 +117,8 @@ class NewsFeedServiceTest {
 
         // 팔로우한 사람의 활동 확인
         Member member = memberService.findMemberByEmail("aaa@aaa");
-        Optional<Activities> activities = activitiesRepository.findByOwner(member.getId());
-        assertThat(activities.get().getNotification()).isEqualTo("bbb@aaa님이 게시물을 작성 했습니다.");
+        List<Activities> activities = activitiesRepository.findByOwnerId(member.getId());
+        assertThat(activities.get(0).getNotification()).isEqualTo("bbb@aaa님이 게시물을 작성 했습니다.");
     }
 
     @Test
@@ -126,9 +126,9 @@ class NewsFeedServiceTest {
         //given
         newsFeedService.changeFollow("aaa@aaa", "bbb@aaa");
         PostsDto postsDto = new PostsDto("포스트를 작성했습니다.",null);
-        newsFeedService.writePost("bbb@aaa",postsDto);
+        newsFeedService.writePost("ccc@aaa",postsDto);
 
-        Member member = memberService.findMemberByEmail("bbb@aaa");
+        Member member = memberService.findMemberByEmail("ccc@aaa");
         List<Posts> posts = postsRepository.findPostsByWriterId(member.getId());
         Long postId = posts.get(0).getId();
 
@@ -140,5 +140,14 @@ class NewsFeedServiceTest {
         assertThat(comments.get(0).getText()).isEqualTo("댓글을 작성했다.");
         assertThat(comments.get(0).getWriter().getEmail()).isEqualTo("bbb@aaa");
 
+        //팔로워의 활동에 추가
+        Member follower = memberService.findMemberByEmail("aaa@aaa");
+        List<Activities> followerActivities = activitiesRepository.findByOwnerId(follower.getId());
+        assertThat(followerActivities.get(0).getNotification()).isEqualTo("bbb@aaa님이 ccc@aaa님의 글에 댓글을 작성했습니다.");
+
+        //게시물 오너의 활동에 추가
+        Member owner = memberService.findMemberByEmail("ccc@aaa");
+        List<Activities> ownerActivities = activitiesRepository.findByOwnerId(owner.getId());
+        assertThat(ownerActivities.get(0).getNotification()).isEqualTo("bbb@aaa님이 내 게시물에 댓글을 달았습니다.");
     }
 }
