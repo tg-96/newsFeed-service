@@ -37,4 +37,10 @@ public class Activities extends BaseTimeEntity {
             case POST_LIKES -> notification = actorEmail+"님이 "+targetEmail+"님의 글을 좋아합니다.";
         }
     }
+    // 내 포스트에 댓글을 작성했을 경우 notificaion 변경
+    // ex) B님이 내 포스트에 댓글을 남겼습니다.
+    public void changeNotification(String notification){
+        this.notification = notification;
+    }
+
 }

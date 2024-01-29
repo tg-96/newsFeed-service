@@ -1,5 +1,6 @@
 package com.newsfeed.service;
 
+import com.newsfeed.dto.CommentsDto;
 import com.newsfeed.dto.FeedsDto;
 import com.newsfeed.dto.PostsDto;
 import com.newsfeed.entity.*;
@@ -21,6 +22,7 @@ public class NewsFeedService {
     private final ActivitiesRepository activitiesRepository;
     private final FeedsRepository feedsRepository;
     private final PostsRepository postsRepository;
+    private final CommentsRepository commentsRepository;
 
     /**
      * 팔로우 & 언팔로우
@@ -143,5 +145,29 @@ public class NewsFeedService {
      * 댓글 작성
      */
     @Transactional
-    public void writeComments(String writerEmail, )
+    public void writeComments(String writerEmail, Long postId, CommentsDto commentsDto) {
+        // 댓글 작성
+        Optional<Member> writer = memberRepository.findByEmail(writerEmail);
+        if (writer.isEmpty()) {
+            throw new RuntimeException("댓쓴이가 존재하지 않습니다.");
+        }
+
+        Optional<Posts> post = postsRepository.findById(postId);
+        if (post.isEmpty()) {
+            throw new RuntimeException("게시글이 존재하지 않습니다.");
+        }
+
+        Comments comments = new Comments(writer.get(), post.get());
+        commentsRepository.save(comments);
+
+        // 팔로워 활동에 추가
+        List<Long> followerList = followRepository.findFollowerList(writer.get().getId());
+        String targetEmail = post.get().getWriter().getEmail();
+
+        followerList.stream().forEach(id -> {
+            Optional<Member> follower = memberRepository.findById(id);
+            Activities activities = new Activities(follower.get(), ActivityType.COMMENTS, writerEmail, targetEmail);
+            activitiesRepository.save(activities);
+        });
+    }
 }

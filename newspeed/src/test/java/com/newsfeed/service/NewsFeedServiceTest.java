@@ -117,4 +117,7 @@ class NewsFeedServiceTest {
         Optional<Activities> activities = activitiesRepository.findByOwner(member.getId());
         assertThat(activities.get().getNotification()).isEqualTo("bbb@aaa님이 게시물을 작성 했습니다.");
     }
+
+    @Test
+    public void 댓글_작성(){}
 }
