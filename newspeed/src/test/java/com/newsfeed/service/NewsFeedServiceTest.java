@@ -157,5 +157,4 @@ class NewsFeedServiceTest {
             System.out.println("comment.getText() = " + comment.getText());
         }
     }
-
 }
