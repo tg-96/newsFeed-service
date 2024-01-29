@@ -4,27 +4,20 @@ import com.newsfeed.dto.CommentsDto;
 import com.newsfeed.dto.CommentsResponseDto;
 import com.newsfeed.dto.FeedsDto;
 import com.newsfeed.dto.PostsDto;
-import com.newsfeed.entity.Feeds;
-import com.newsfeed.entity.Member;
 import com.newsfeed.service.MemberService;
 import com.newsfeed.service.NewsFeedService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 @RestController
 @RequestMapping("/newsFeed")
 @RequiredArgsConstructor
 public class NewsFeedController {
     private final NewsFeedService newsFeedService;
-    private final MemberService memberService;
     /**
      * 팔로우
      */

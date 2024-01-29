@@ -122,7 +122,7 @@ class NewsFeedServiceTest {
     }
 
     @Test
-    public void 댓글_작성(){
+    public void 댓글_작성_조회(){
         //given
         newsFeedService.changeFollow("aaa@aaa", "bbb@aaa");
         PostsDto postsDto = new PostsDto("포스트를 작성했습니다.",null);
@@ -140,14 +140,22 @@ class NewsFeedServiceTest {
         assertThat(comments.get(0).getText()).isEqualTo("댓글을 작성했다.");
         assertThat(comments.get(0).getWriter().getEmail()).isEqualTo("bbb@aaa");
 
-        //팔로워의 활동에 추가
+        //팔로워의 활동에 추가 여부 확인
         Member follower = memberService.findMemberByEmail("aaa@aaa");
         List<Activities> followerActivities = activitiesRepository.findByOwnerId(follower.getId());
         assertThat(followerActivities.get(0).getNotification()).isEqualTo("bbb@aaa님이 ccc@aaa님의 글에 댓글을 작성했습니다.");
 
-        //게시물 오너의 활동에 추가
+        //게시물 오너의 활동에 추가 여부 확인
         Member owner = memberService.findMemberByEmail("ccc@aaa");
         List<Activities> ownerActivities = activitiesRepository.findByOwnerId(owner.getId());
         assertThat(ownerActivities.get(0).getNotification()).isEqualTo("bbb@aaa님이 내 게시물에 댓글을 달았습니다.");
+
+        //게시물 댓글 조회
+        newsFeedService.writeComments("aaa@aaa",postId,new CommentsDto("두번째 댓글을 작성했다."));
+        List<Comments> comments1 = commentsRepository.findByPostId(postId);
+        for(Comments comment:comments1){
+            System.out.println("comment.getText() = " + comment.getText());
+        }
     }
+
 }

@@ -8,6 +8,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface CommentsRepository extends JpaRepository<Comments,Long> {
-    @Query("select c from Comments c where c.posts.id = :postId order by c.createdDate desc")
+    @Query("select c from Comments c where c.posts.id = :postId order by c.createdDate")
     List<Comments> findByPostId(@Param("postId")Long postId);
 }
