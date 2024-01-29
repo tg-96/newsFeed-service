@@ -1,5 +1,7 @@
 package com.newsfeed.controller;
 
+import com.newsfeed.dto.CommentsDto;
+import com.newsfeed.dto.CommentsResponseDto;
 import com.newsfeed.dto.FeedsDto;
 import com.newsfeed.dto.PostsDto;
 import com.newsfeed.entity.Feeds;
@@ -60,5 +62,24 @@ public class NewsFeedController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * 댓글 작성
+     */
+    @PostMapping("/comments/{postId}")
+    public ResponseEntity<Void> writeComments(@PathVariable("postId")Long postId,
+                                              @RequestBody CommentsDto commentsDto){
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        newsFeedService.writeComments(email,postId,commentsDto);
+
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 댓글 조회
+     */
+    @GetMapping("/comments/{postId}")
+    public List<CommentsResponseDto> findComments(@PathVariable("postId")Long postId){
+        return newsFeedService.findCommentsByPost(postId);
+    }
 
 }

@@ -9,6 +9,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ActivitiesRepository extends JpaRepository<Activities,Long> {
-    @Query("select a from Activities a where a.owner.id = :id")
+    @Query("select a from Activities a where a.owner.id = :id order by a.createdDate desc")
     List<Activities> findByOwnerId(@Param("id") Long id);
 }

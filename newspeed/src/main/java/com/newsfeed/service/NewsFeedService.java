@@ -1,6 +1,7 @@
 package com.newsfeed.service;
 
 import com.newsfeed.dto.CommentsDto;
+import com.newsfeed.dto.CommentsResponseDto;
 import com.newsfeed.dto.FeedsDto;
 import com.newsfeed.dto.PostsDto;
 import com.newsfeed.entity.*;
@@ -61,6 +62,13 @@ public class NewsFeedService {
 
         return fromEmail + " 님이 " + toEmail + " 님을 팔로우 했습니다.";
     }
+    /**
+     * 팔로우 수 조회
+     */
+
+    /**
+     * 팔로워 수 조회
+     */
 
     /**
      * 뉴스피드 조회
@@ -88,6 +96,7 @@ public class NewsFeedService {
                 .map(post -> new FeedsDto(
                         post.getContent(),
                         post.getWriter().getEmail(),
+                        post.getWriter().getName(),
                         post.getImage(),
                         post.getCreatedDate(),
                         post.getModifiedDate())
@@ -163,15 +172,27 @@ public class NewsFeedService {
 
         //게시물 주인의 활동에 추가
         Member postOwner = post.get().getWriter();
-        Activities activities = new Activities(postOwner,ActivityType.POSTS,writerEmail,null);
+        Activities activities = new Activities(postOwner, ActivityType.POSTS, writerEmail, null);
 
-        String notification = writer.get().getEmail()+"님이 내 게시물에 댓글을 달았습니다.";
+        String notification = writer.get().getEmail() + "님이 내 게시물에 댓글을 달았습니다.";
 
         activities.changeNotification(notification);
         activitiesRepository.save(activities);
     }
 
-    //포스트의 댓글조회
+    /**
+     * 게시글 댓글 조회
+     */
+    public List<CommentsResponseDto> findCommentsByPost(Long postId) {
+        List<Comments> comments = commentsRepository.findByPostId(postId);
 
-    //
+        return comments.stream().map(c ->
+                new CommentsResponseDto(c.getWriter().getEmail(), c.getWriter().getName(), c.getText())
+        ).collect(Collectors.toList());
+    }
+
+    /**
+     * 나의 활동 조회
+     */
+
 }

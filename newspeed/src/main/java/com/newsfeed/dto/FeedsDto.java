@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 public class FeedsDto {
     private String text;
     private String writerEmail;
+    private String name;
     private String image;
     private LocalDateTime createDate;
     private LocalDateTime updateDate;
