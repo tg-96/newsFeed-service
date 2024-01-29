@@ -3,18 +3,13 @@ package com.newsfeed.service;
 import com.newsfeed.dto.FeedsDto;
 import com.newsfeed.dto.PostsDto;
 import com.newsfeed.entity.*;
-import com.newsfeed.repository.ActivitiesRepository;
-import com.newsfeed.repository.FeedsRepository;
-import com.newsfeed.repository.FollowsRepository;
-import com.newsfeed.repository.MemberRepository;
+import com.newsfeed.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +20,7 @@ public class NewsFeedService {
     private final MemberRepository memberRepository;
     private final ActivitiesRepository activitiesRepository;
     private final FeedsRepository feedsRepository;
+    private final PostsRepository postsRepository;
 
     /**
      * 팔로우 & 언팔로우
@@ -47,6 +43,7 @@ public class NewsFeedService {
             followRepository.delete(relation.get());
             return fromEmail + " 님이 " + toEmail + " 님을 팔로우 취소 했습니다.";
         }
+
         //팔로우 상태 아니면 팔로우
         followRepository.save(new Follows(fromMemberId, toMemberId));
 
@@ -77,7 +74,7 @@ public class NewsFeedService {
         List<Feeds> feeds = feedsRepository.findByOwner(member.get());
 
         //feeds가 없으면 예외 처리
-        if (feeds == null || feeds.isEmpty()) {
+        if (feeds.isEmpty()) {
             throw new RuntimeException("피드가 비어있습니다.");
         }
 
@@ -99,50 +96,46 @@ public class NewsFeedService {
      */
     @Transactional
     public void writePost(String writerEmail, PostsDto postsDto) {
-        Optional<Member> member = memberRepository.findByEmailJoinPostsAndFeedsAndActivities(writerEmail);
+        Optional<Member> member = memberRepository.findByEmail(writerEmail);
 
         if (member.isEmpty()) {
             throw new RuntimeException("멤버 정보가 없습니다.");
         }
 
         //게시물 생성
-        Set<Comments> comments = new HashSet<>();
         Posts post = new Posts(postsDto.getContent(), postsDto.getImage(), member.get());
+        Posts saved_posts = postsRepository.save(post);
 
-        //피드 생성
-        Feeds feed = new Feeds(post);
+        //내피드에 추가
+        Feeds feed = new Feeds(saved_posts, member.get());
+        feedsRepository.save(feed);
 
-        //활동 생성
+        //내 활동에 추가
         Activities activity = Activities.builder()
+                .member(member.get())
                 .actorEmail(writerEmail)
                 .type(ActivityType.POSTS)
                 .build();
 
-        //내가 쓴 포스트에 추가
-        member.get().addPost(post);
+        activitiesRepository.save(activity);
 
-        //내 피드에 추가
-        member.get().addFeed(feed);
-
-        //내 활동에 추가
-        member.get().addActivity(activity);
-
-        //팔로워 조회
+        //내 팔로워들의 피드,활동에 추가
         List<Long> followerIdList = followRepository.findFollowerList(member.get().getId());
-        ///팔로워가 없을 경우
-        if (followerIdList.isEmpty()) {
-            return;
-        }
 
-        //팔로워들의 피드/활동에 추가
-        followerIdList.stream().forEach(
-                id -> {
-                    memberRepository
-                            .findByIdJoinFeedAndActivities(id)
-                            .ifPresent(m -> {
-                                m.addFeed(feed);
-                                m.addActivity(activity);
-                            });
-                });
+        followerIdList.stream().forEach(id -> {
+            Optional<Member> follower = memberRepository.findById(id);
+
+            if (follower.isEmpty()) {
+                throw new RuntimeException("follower 정보가 존재하지 않습니다.");
+            }
+
+            feedsRepository.save(new Feeds(saved_posts, follower.get()));
+
+            activitiesRepository.save(Activities.builder()
+                    .member(follower.get())
+                    .type(ActivityType.POSTS)
+                    .actorEmail(writerEmail)
+                    .build());
+        });
     }
 }

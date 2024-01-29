@@ -20,8 +20,8 @@ public class Feeds extends BaseTimeEntity {
     @JoinColumn(name = "post_id")
     private Posts post;
 
-    public Feeds(Posts post,Member member) {
-        this.owner = member;
+    public Feeds(Posts post,Member owner) {
+        this.owner = owner;
         this.post = post;
     }
 }

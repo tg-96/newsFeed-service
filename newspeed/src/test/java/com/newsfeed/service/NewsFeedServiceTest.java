@@ -1,14 +1,13 @@
 package com.newsfeed.service;
 
 import com.newsfeed.dto.JoinDto;
-import com.newsfeed.entity.Activities;
 import com.newsfeed.entity.Member;
+import com.newsfeed.repository.ActivitiesRepository;
 import com.newsfeed.repository.FollowsRepository;
 import jakarta.annotation.PostConstruct;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +23,8 @@ class NewsFeedServiceTest {
     NewsFeedService newsFeedService;
     @Autowired
     FollowsRepository followRepository;
+    @Autowired
+    ActivitiesRepository activitiesRepository;
     @Autowired
     MemberService joinService;
     @Autowired
@@ -62,7 +63,6 @@ class NewsFeedServiceTest {
 
         //when
         String message = newsFeedService.changeFollow("aaa@aaa", "bbb@aaa");
-        System.out.println("왜안될까?????");
         newsFeedService.changeFollow("bbb@aaa", "ccc@aaa");
 
         //then
@@ -73,8 +73,12 @@ class NewsFeedServiceTest {
 
         ///bbb의 활동이 aaa에게 뜨는지 확인
         Member aaa = memberService.findMemberByEmail("aaa@aaa");
-        Activities activity = aaa.getActivities().get(0);
-        assertThat(activity.getNotification()).isEqualTo("bbb@aaa"+"님이 "+"ccc@aaa"+"을 팔로우 했습니다.");
+
+        assertThat(
+                activitiesRepository.findByOwner(aaa.getId())
+                        .get()
+                        .getNotification()
+        ).isEqualTo("bbb@aaa" + "님이 " + "ccc@aaa" + "을 팔로우 했습니다.");
     }
 
 //    @Test

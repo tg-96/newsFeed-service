@@ -16,7 +16,7 @@ public class Activities extends BaseTimeEntity {
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
-    private Member member;
+    private Member owner;
     private ActivityType type;
     private String notification;
     private String actorEmail;
@@ -24,6 +24,7 @@ public class Activities extends BaseTimeEntity {
 
     @Builder
     public Activities(Member member,ActivityType type, String actorEmail, String targetEmail) {
+        this.owner = member;
         this.type = type;
         this.actorEmail = actorEmail;
         this.targetEmail = targetEmail;
