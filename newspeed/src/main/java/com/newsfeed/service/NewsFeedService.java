@@ -157,10 +157,10 @@ public class NewsFeedService {
             throw new RuntimeException("게시글이 존재하지 않습니다.");
         }
 
-        Comments comments = new Comments(writer.get(), post.get());
+        Comments comments = new Comments(writer.get(), post.get(), commentsDto.getText());
         commentsRepository.save(comments);
 
-        // 팔로워 활동에 추가
+        // 팔로워 활동에 나의 댓글 활동 추가
         List<Long> followerList = followRepository.findFollowerList(writer.get().getId());
         String targetEmail = post.get().getWriter().getEmail();
 
@@ -169,5 +169,18 @@ public class NewsFeedService {
             Activities activities = new Activities(follower.get(), ActivityType.COMMENTS, writerEmail, targetEmail);
             activitiesRepository.save(activities);
         });
+
+        //게시물 주인의 활동에 추가
+        Member postOwner = post.get().getWriter();
+        Activities activities = new Activities(postOwner,ActivityType.POSTS,writerEmail,null);
+
+        String notification = writer.get().getName()+"님이 게시물에 댓글을 달았습니다.";
+
+        activities.changeNotification(notification);
+        activitiesRepository.save(activities);
     }
+
+    //포스트의 댓글조회
+
+    //
 }

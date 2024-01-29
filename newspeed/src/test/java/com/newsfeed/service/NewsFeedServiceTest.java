@@ -1,21 +1,23 @@
 package com.newsfeed.service;
 
+import com.newsfeed.dto.CommentsDto;
 import com.newsfeed.dto.FeedsDto;
 import com.newsfeed.dto.JoinDto;
 import com.newsfeed.dto.PostsDto;
 import com.newsfeed.entity.Activities;
+import com.newsfeed.entity.Comments;
 import com.newsfeed.entity.Member;
+import com.newsfeed.entity.Posts;
 import com.newsfeed.repository.ActivitiesRepository;
+import com.newsfeed.repository.CommentsRepository;
 import com.newsfeed.repository.FollowsRepository;
 import com.newsfeed.repository.PostsRepository;
-import jakarta.annotation.PostConstruct;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.event.annotation.BeforeTestMethod;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -39,6 +41,8 @@ class NewsFeedServiceTest {
     MemberService memberService;
     @Autowired
     PostsRepository postsRepository;
+    @Autowired
+    CommentsRepository commentsRepository;
 
     @BeforeAll
     public static void init(@Autowired ApplicationContext context) {
@@ -101,7 +105,6 @@ class NewsFeedServiceTest {
         //bbb가 post 작성
         PostsDto postsDto = new PostsDto("포스트를 작성했습니다.",null);
         newsFeedService.writePost("bbb@aaa",postsDto);
-        System.out.println("여기가 문제인가???");
 
         //then
         // 본인 피드 확인
@@ -119,5 +122,23 @@ class NewsFeedServiceTest {
     }
 
     @Test
-    public void 댓글_작성(){}
+    public void 댓글_작성(){
+        //given
+        newsFeedService.changeFollow("aaa@aaa", "bbb@aaa");
+        PostsDto postsDto = new PostsDto("포스트를 작성했습니다.",null);
+        newsFeedService.writePost("bbb@aaa",postsDto);
+
+        Member member = memberService.findMemberByEmail("bbb@aaa");
+        List<Posts> posts = postsRepository.findPostsByWriterId(member.getId());
+        Long postId = posts.get(0).getId();
+
+        //when
+        newsFeedService.writeComments("bbb@aaa",postId,new CommentsDto("댓글을 작성했다."));
+
+        //then
+        List<Comments> comments = commentsRepository.findByPostId(postId);
+        assertThat(comments.get(0).getText()).isEqualTo("댓글을 작성했다.");
+        assertThat(comments.get(0).getWriter().getEmail()).isEqualTo("bbb@aaa");
+
+    }
 }
