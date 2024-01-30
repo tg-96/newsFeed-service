@@ -16,10 +16,12 @@ public class PostLikes {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private Posts posts;
-    private String likeUsersEmail;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member likers;
 
-    public PostLikes(Posts posts, String likeUsersEmail) {
+    public PostLikes(Posts posts, Member member) {
         this.posts = posts;
-        this.likeUsersEmail = likeUsersEmail;
+        this.likers = member;
     }
 }

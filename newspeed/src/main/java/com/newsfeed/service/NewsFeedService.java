@@ -24,6 +24,8 @@ public class NewsFeedService {
     private final FeedsRepository feedsRepository;
     private final PostsRepository postsRepository;
     private final CommentsRepository commentsRepository;
+    private final PostLikesRepository postLikesRepository;
+    private final CommentLikesRepository commentLikesRepository;
 
     /**
      * 팔로우 & 언팔로우
@@ -187,12 +189,81 @@ public class NewsFeedService {
         List<Comments> comments = commentsRepository.findByPostId(postId);
 
         return comments.stream().map(c ->
-                new CommentsResponseDto(c.getWriter().getEmail(), c.getWriter().getName(), c.getText())
+                new CommentsResponseDto(c.getId(),c.getWriter().getEmail(), c.getWriter().getName(), c.getText())
         ).collect(Collectors.toList());
     }
 
     /**
+     * 게시글 좋아요
+     */
+    @Transactional
+    public void postLike(String email, Long postId) {
+        Optional<Member> member = memberRepository.findByEmail(email);
+        if (member.isEmpty()) {
+            throw new RuntimeException("좋아요한 멤버가 존재하지 않습니다.");
+        }
+
+        Optional<Posts> post = postsRepository.findById(postId);
+        if (post.isEmpty()) {
+            throw new RuntimeException("좋아요한 게시글이 존재하지 않습니다.");
+        }
+        //좋아요 저장
+        PostLikes postLikes = new PostLikes(post.get(), member.get());
+        postLikesRepository.save(postLikes);
+
+        //좋아요 활동 팔로워에 남기기
+        List<Long> followerList = followRepository.findFollowerList(member.get().getId());
+        followerList.stream().forEach(id ->
+                memberRepository.findById(id).ifPresent(m -> {
+                    Activities activities = new Activities(member.get(), ActivityType.POST_LIKES, email, post.get().getWriter().getEmail());
+                    activitiesRepository.save(activities);
+                })
+        );
+    }
+
+    /**
+     * 댓글 좋아요
+     */
+    @Transactional
+    public void commentLike(Long commentsId,String email){
+        Optional<Comments> comment = commentsRepository.findById(commentsId);
+        if(comment.isEmpty()){
+            throw new RuntimeException("좋아요한 댓글이 존재하지 않습니다.");
+        }
+        Optional<Member> member = memberRepository.findByEmail(email);
+        if(member.isEmpty()){
+            throw new RuntimeException("좋아요한 회원이 존재하지 않습니다.");
+        }
+
+        //댓글 좋아요 저장
+        CommentLikes commentLikes = new CommentLikes(comment.get(),email);
+        commentLikesRepository.save(commentLikes);
+
+        //댓글 좋아요, 팔로워 활동에 남기기
+        Optional<Comments> comments = commentsRepository.findById(commentsId);
+        if(comments.isEmpty()){
+            throw new RuntimeException("좋아요한 댓글이 존재하지 않습니다.");
+        }
+        List<Long> followerList = followRepository.findFollowerList(member.get().getId());
+        followerList.stream().forEach(id ->
+                memberRepository.findById(id).ifPresent(m -> {
+                    Activities activities = new Activities(member.get(), ActivityType.COMMENT_LIKE, email,comments.get().getWriter().getEmail() );
+                    activitiesRepository.save(activities);
+                })
+        );
+    }
+
+    /**
      * 나의 활동 조회
+     */
+
+    /**
+     * 게시글 좋아요 조회
+     */
+
+    /**
+     * 댓글 좋아요 조회
+     *
      */
 
 }
