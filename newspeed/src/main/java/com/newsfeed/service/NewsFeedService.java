@@ -270,8 +270,11 @@ public class NewsFeedService {
      */
     public List<PostLikesDto> findPostLike(Long postId){
         List<PostLikes> postLikesList = postLikesRepository.findByPostId(postId);
+
+        int count = postLikesList.size();
+
         return postLikesList.stream()
-                .map(pl -> new PostLikesDto(postId, pl.getLikers().getEmail()))
+                .map(pl -> new PostLikesDto(postId, pl.getLikers().getEmail(),count))
                 .collect(Collectors.toList());
     }
 
@@ -281,8 +284,11 @@ public class NewsFeedService {
     public List<CommentLikesDto> findCommentLike(Long commentId){
         List<CommentLikes> commentLikesList = commentLikesRepository.findCommentLikesByCommentsId(commentId);
         Optional<Comments> comments = commentsRepository.findById(commentId);
+
+        int count = commentLikesList.size();
+
         return commentLikesList.stream()
-                .map(cl -> new CommentLikesDto(commentId,comments.get().getWriter().getEmail()))
+                .map(cl -> new CommentLikesDto(commentId,comments.get().getWriter().getEmail(),count))
                 .collect(Collectors.toList());
     }
 }

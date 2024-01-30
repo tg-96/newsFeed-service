@@ -10,4 +10,5 @@ import lombok.Setter;
 public class CommentLikesDto {
     private Long commentId;
     private String likersEmail;
+    private int count;
 }
