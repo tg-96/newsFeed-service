@@ -47,7 +47,7 @@ public class NewsFeedController {
     /**
      * 게시글 작성
      */
-    @PostMapping("/post")
+    @PostMapping("/posts")
     public ResponseEntity<Void> writePost(@RequestBody PostsDto postsDto){
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         newsFeedService.writePost(email,postsDto);
@@ -75,4 +75,23 @@ public class NewsFeedController {
         return newsFeedService.findCommentsByPost(postId);
     }
 
+    /**
+     * 게시글 좋아요
+     */
+    @PostMapping("/posts/like/{postId}")
+    public ResponseEntity<Void> likePost(@PathVariable("postId")Long postId){
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        newsFeedService.postLike(email,postId);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 댓글 좋아요
+     */
+    @PostMapping("/comments/like/{commentId}")
+    public ResponseEntity<Void> likeComment(@PathVariable("commentId")Long commentId){
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        newsFeedService.commentLike(commentId,email);
+        return ResponseEntity.ok().build();
+    }
 }
