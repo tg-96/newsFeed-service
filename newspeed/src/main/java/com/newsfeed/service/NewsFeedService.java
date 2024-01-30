@@ -147,7 +147,7 @@ public class NewsFeedService {
      * 댓글 작성
      */
     @Transactional
-    public void writeComments(String writerEmail, Long postId, CommentsDto commentsDto) {
+    public Long writeComments(String writerEmail, Long postId, CommentsDto commentsDto) {
         // 댓글 작성
         Optional<Member> writer = memberRepository.findByEmail(writerEmail);
         if (writer.isEmpty()) {
@@ -160,7 +160,7 @@ public class NewsFeedService {
         }
 
         Comments comments = new Comments(writer.get(), post.get(), commentsDto.getText());
-        commentsRepository.save(comments);
+        Comments save = commentsRepository.save(comments);
 
         // 팔로워 활동에 나의 댓글 활동 추가
         List<Long> followerList = followRepository.findFollowerList(writer.get().getId());
@@ -180,6 +180,7 @@ public class NewsFeedService {
 
         activities.changeNotification(notification);
         activitiesRepository.save(activities);
+        return save.getId();
     }
 
     /**
@@ -232,7 +233,7 @@ public class NewsFeedService {
      * 댓글 좋아요
      */
     @Transactional
-    public void commentLike(Long commentsId,String email){
+    public Long commentLike(Long commentsId,String email){
         Optional<Comments> comment = commentsRepository.findById(commentsId);
         if(comment.isEmpty()){
             throw new RuntimeException("좋아요한 댓글이 존재하지 않습니다.");
@@ -244,13 +245,13 @@ public class NewsFeedService {
 
         //댓글 좋아요 저장
         CommentLikes commentLikes = new CommentLikes(comment.get(),email);
-        commentLikesRepository.save(commentLikes);
+        CommentLikes save = commentLikesRepository.save(commentLikes);
 
         //댓글 좋아요, 팔로워 활동에 남기기
         List<Long> followerList = followRepository.findFollowerList(member.get().getId());
         followerList.stream().forEach(id ->
                 memberRepository.findById(id).ifPresent(m -> {
-                    Activities activities = new Activities(member.get(), ActivityType.COMMENT_LIKE, email,comment.get().getWriter().getEmail() );
+                    Activities activities = new Activities(m, ActivityType.COMMENT_LIKE, email,comment.get().getWriter().getEmail() );
                     activitiesRepository.save(activities);
                 })
         );
@@ -259,6 +260,8 @@ public class NewsFeedService {
         Activities activities = new Activities(comment.get().getWriter(), ActivityType.COMMENT_LIKE,email,comment.get().getWriter().getEmail());
         String notification = email+"님이 내 댓글을 좋아합니다.";
         activitiesRepository.save(activities);
+
+        return save.getId();
     }
 
     /**

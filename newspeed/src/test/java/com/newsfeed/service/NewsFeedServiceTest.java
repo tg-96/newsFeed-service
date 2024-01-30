@@ -15,6 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,6 +39,8 @@ class NewsFeedServiceTest {
     CommentsRepository commentsRepository;
     @Autowired
     PostLikesRepository postLikesRepository;
+    @Autowired
+    CommentLikesRepository commentLikesRepository;
 
     @BeforeAll
     public static void init(@Autowired ApplicationContext context) {
@@ -192,10 +195,31 @@ class NewsFeedServiceTest {
     public void 댓글_좋아요() {
         //given
         newsFeedService.changeFollow("aaa@aaa", "bbb@aaa");
+        newsFeedService.changeFollow("bbb@aaa", "ccc@aaa");
+        newsFeedService.changeFollow("ccc@aaa", "aaa@aaa");
 
         PostsDto postsDto = new PostsDto("포스트를 작성했습니다.", null);
-        newsFeedService.writePost("bbb@aaa", postsDto);
+        newsFeedService.writePost("ccc@aaa", postsDto);
 
+        Member ccc = memberService.findMemberByEmail("ccc@aaa");
+        Member bbb = memberService.findMemberByEmail("bbb@aaa");
 
+        List<Posts> posts = postsRepository.findPostsByWriterId(ccc.getId());
+
+        Long commentid = newsFeedService.writeComments("bbb@aaa",posts.get(0).getId(),new CommentsDto("댓글을 작성했습니다."));
+
+        //when
+        newsFeedService.commentLike(commentid,"aaa@aaa");
+
+        //then
+        Optional<Comments> comment = commentsRepository.findById(commentid);
+        CommentLikes commentLikes = commentLikesRepository.findCommentLikesByLikeUsersEmail("aaa@aaa");
+        assertThat(commentLikes.getComments().getWriter().getEmail()).isEqualTo("bbb@aaa");
+        assertThat(commentLikes.getComments().getText()).isEqualTo("댓글을 작성했습니다.");
+
+        List<Activities> activities = activitiesRepository.findByOwnerId(ccc.getId());
+        for(Activities a: activities){
+            System.out.println(a.getNotification());
+        }
     }
 }
