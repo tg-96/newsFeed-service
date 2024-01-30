@@ -4,14 +4,8 @@ import com.newsfeed.dto.CommentsDto;
 import com.newsfeed.dto.FeedsDto;
 import com.newsfeed.dto.JoinDto;
 import com.newsfeed.dto.PostsDto;
-import com.newsfeed.entity.Activities;
-import com.newsfeed.entity.Comments;
-import com.newsfeed.entity.Member;
-import com.newsfeed.entity.Posts;
-import com.newsfeed.repository.ActivitiesRepository;
-import com.newsfeed.repository.CommentsRepository;
-import com.newsfeed.repository.FollowsRepository;
-import com.newsfeed.repository.PostsRepository;
+import com.newsfeed.entity.*;
+import com.newsfeed.repository.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +15,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -43,6 +36,8 @@ class NewsFeedServiceTest {
     PostsRepository postsRepository;
     @Autowired
     CommentsRepository commentsRepository;
+    @Autowired
+    PostLikesRepository postLikesRepository;
 
     @BeforeAll
     public static void init(@Autowired ApplicationContext context) {
@@ -97,14 +92,14 @@ class NewsFeedServiceTest {
     }
 
     @Test
-    public void 포스트_작성(){
+    public void 포스트_작성() {
         //given
         //팔로우 aaa->bbb
         newsFeedService.changeFollow("aaa@aaa", "bbb@aaa");
 
         //bbb가 post 작성
-        PostsDto postsDto = new PostsDto("포스트를 작성했습니다.",null);
-        newsFeedService.writePost("bbb@aaa",postsDto);
+        PostsDto postsDto = new PostsDto("포스트를 작성했습니다.", null);
+        newsFeedService.writePost("bbb@aaa", postsDto);
 
         //then
         // 본인 피드 확인
@@ -122,18 +117,19 @@ class NewsFeedServiceTest {
     }
 
     @Test
-    public void 댓글_작성_조회(){
+    public void 댓글_작성_조회() {
+
         //given
         newsFeedService.changeFollow("aaa@aaa", "bbb@aaa");
-        PostsDto postsDto = new PostsDto("포스트를 작성했습니다.",null);
-        newsFeedService.writePost("ccc@aaa",postsDto);
+        PostsDto postsDto = new PostsDto("포스트를 작성했습니다.", null);
+        newsFeedService.writePost("ccc@aaa", postsDto);
 
         Member member = memberService.findMemberByEmail("ccc@aaa");
         List<Posts> posts = postsRepository.findPostsByWriterId(member.getId());
         Long postId = posts.get(0).getId();
 
         //when
-        newsFeedService.writeComments("bbb@aaa",postId,new CommentsDto("댓글을 작성했다."));
+        newsFeedService.writeComments("bbb@aaa", postId, new CommentsDto("댓글을 작성했다."));
 
         //then
         List<Comments> comments = commentsRepository.findByPostId(postId);
@@ -151,10 +147,55 @@ class NewsFeedServiceTest {
         assertThat(ownerActivities.get(0).getNotification()).isEqualTo("bbb@aaa님이 내 게시물에 댓글을 달았습니다.");
 
         //게시물 댓글 조회
-        newsFeedService.writeComments("aaa@aaa",postId,new CommentsDto("두번째 댓글을 작성했다."));
+        newsFeedService.writeComments("aaa@aaa", postId, new CommentsDto("두번째 댓글을 작성했다."));
         List<Comments> comments1 = commentsRepository.findByPostId(postId);
-        for(Comments comment:comments1){
+        for (Comments comment : comments1) {
             System.out.println("comment.getText() = " + comment.getText());
         }
+    }
+
+    @Test
+    public void 게시글_좋아요() {
+        //given
+        newsFeedService.changeFollow("aaa@aaa", "bbb@aaa");
+        newsFeedService.changeFollow("bbb@aaa", "ccc@aaa");
+
+        PostsDto postsDto = new PostsDto("포스트를 작성했습니다.", null);
+        newsFeedService.writePost("ccc@aaa", postsDto);
+
+        Member ccc = memberService.findMemberByEmail("ccc@aaa");
+        List<Posts> posts = postsRepository.findPostsByWriterId(ccc.getId());
+
+        Member aaa = memberService.findMemberByEmail("aaa@aaa");
+
+        //when
+        newsFeedService.postLike("bbb@aaa", posts.get(0).getId());
+
+        //then
+        PostLikes postLike = postLikesRepository.findByPostId(posts.get(0).getId()).get();
+        assertThat(postLike.getLikers().getEmail()).isEqualTo("bbb@aaa");
+
+        List<Activities> activities = activitiesRepository.findByOwnerId(aaa.getId());
+        for(Activities activity : activities){
+            System.out.println(activity.getNotification());
+        }
+        assertThat(activities.get(0).getNotification()).isEqualTo("bbb@aaa님이 ccc@aaa님의 글을 좋아합니다.");
+
+        List<Activities> activities2 = activitiesRepository.findByOwnerId(ccc.getId());
+        for(Activities activity : activities2){
+            System.out.println(activity.getNotification());
+        }
+        assertThat(activities2.get(0).getNotification()).isEqualTo("bbb@aaa님이 내 게시글을 좋아합니다.");
+    }
+
+    @Test
+    public void 댓글_좋아요() {
+        //given
+        newsFeedService.changeFollow("aaa@aaa", "bbb@aaa");
+
+        PostsDto postsDto = new PostsDto("포스트를 작성했습니다.", null);
+        newsFeedService.writePost("bbb@aaa", postsDto);
+
+
     }
 }

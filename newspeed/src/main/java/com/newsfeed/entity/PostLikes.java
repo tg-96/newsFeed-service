@@ -20,8 +20,8 @@ public class PostLikes {
     @JoinColumn(name = "member_id")
     private Member likers;
 
-    public PostLikes(Posts posts, Member member) {
+    public PostLikes(Posts posts, Member liker) {
         this.posts = posts;
-        this.likers = member;
+        this.likers = liker;
     }
 }

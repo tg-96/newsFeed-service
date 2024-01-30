@@ -215,10 +215,17 @@ public class NewsFeedService {
         List<Long> followerList = followRepository.findFollowerList(member.get().getId());
         followerList.stream().forEach(id ->
                 memberRepository.findById(id).ifPresent(m -> {
-                    Activities activities = new Activities(member.get(), ActivityType.POST_LIKES, email, post.get().getWriter().getEmail());
+                    Activities activities = new Activities(m, ActivityType.POST_LIKES, email, post.get().getWriter().getEmail());
                     activitiesRepository.save(activities);
                 })
         );
+
+        //게시글 주인 활동에 남기기
+        Member postOwner = post.get().getWriter();
+        Activities activities = new Activities(postOwner,ActivityType.POST_LIKES,email,postOwner.getEmail());
+        String notificaton = email+"님이 내 게시글을 좋아합니다.";
+        activities.changeNotification(notificaton);
+        activitiesRepository.save(activities);
     }
 
     /**
@@ -240,17 +247,18 @@ public class NewsFeedService {
         commentLikesRepository.save(commentLikes);
 
         //댓글 좋아요, 팔로워 활동에 남기기
-        Optional<Comments> comments = commentsRepository.findById(commentsId);
-        if(comments.isEmpty()){
-            throw new RuntimeException("좋아요한 댓글이 존재하지 않습니다.");
-        }
         List<Long> followerList = followRepository.findFollowerList(member.get().getId());
         followerList.stream().forEach(id ->
                 memberRepository.findById(id).ifPresent(m -> {
-                    Activities activities = new Activities(member.get(), ActivityType.COMMENT_LIKE, email,comments.get().getWriter().getEmail() );
+                    Activities activities = new Activities(member.get(), ActivityType.COMMENT_LIKE, email,comment.get().getWriter().getEmail() );
                     activitiesRepository.save(activities);
                 })
         );
+
+        //댓글 주인의 활동에 남기기
+        Activities activities = new Activities(comment.get().getWriter(), ActivityType.COMMENT_LIKE,email,comment.get().getWriter().getEmail());
+        String notification = email+"님이 내 댓글을 좋아합니다.";
+        activitiesRepository.save(activities);
     }
 
     /**
