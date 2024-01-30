@@ -14,19 +14,33 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
     private final MemberService memberService;
 
-    //유저 정보 업데이트
+    /**
+     * 회원 정보 조회
+     */
+
+
+    /**
+     *유저 정보 업데이트
+     */
     @PatchMapping("/member")
     public void updateMember(@RequestBody MemberDto memberDto) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         memberService.updateProfile(memberDto,email);
     }
-    //비밀번호 업데이트
+
+    /**
+     * 비밀번호 업데이트
+     **/
     @PutMapping("/member/pwd")
     public void updatePwd(@RequestParam String password){
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
         memberService.updatePassword(password,email);
     }
+
+    /**
+     * 회원가입
+     */
     @PostMapping("/join")
     public ResponseEntity<Void> join(@RequestBody JoinDto joinDto){
         memberService.join(joinDto);

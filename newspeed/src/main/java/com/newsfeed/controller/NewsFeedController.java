@@ -1,10 +1,6 @@
 package com.newsfeed.controller;
 
-import com.newsfeed.dto.CommentsDto;
-import com.newsfeed.dto.CommentsResponseDto;
-import com.newsfeed.dto.FeedsDto;
-import com.newsfeed.dto.PostsDto;
-import com.newsfeed.service.MemberService;
+import com.newsfeed.dto.*;
 import com.newsfeed.service.NewsFeedService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -79,19 +75,32 @@ public class NewsFeedController {
      * 게시글 좋아요
      */
     @PostMapping("/posts/like/{postId}")
-    public ResponseEntity<Void> likePost(@PathVariable("postId")Long postId){
+    public ResponseEntity<Void> postLike(@PathVariable("postId")Long postId){
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         newsFeedService.postLike(email,postId);
         return ResponseEntity.ok().build();
     }
 
     /**
+     * 게시글별 좋아요 조회
+     */
+    @GetMapping("/posts/like/{postId}")
+    public List<PostLikesDto> findPostLikes(@PathVariable("postId")Long postId){
+        return newsFeedService.findPostLike(postId);
+    }
+
+    /**
+     * 댓글별 좋아요 조회
+     */
+
+    /**
      * 댓글 좋아요
      */
     @PostMapping("/comments/like/{commentId}")
-    public ResponseEntity<Void> likeComment(@PathVariable("commentId")Long commentId){
+    public ResponseEntity<Void> commentLike(@PathVariable("commentId")Long commentId){
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         newsFeedService.commentLike(commentId,email);
         return ResponseEntity.ok().build();
     }
+
 }

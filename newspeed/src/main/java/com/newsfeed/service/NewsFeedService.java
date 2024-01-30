@@ -1,9 +1,6 @@
 package com.newsfeed.service;
 
-import com.newsfeed.dto.CommentsDto;
-import com.newsfeed.dto.CommentsResponseDto;
-import com.newsfeed.dto.FeedsDto;
-import com.newsfeed.dto.PostsDto;
+import com.newsfeed.dto.*;
 import com.newsfeed.entity.*;
 import com.newsfeed.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -271,7 +268,12 @@ public class NewsFeedService {
     /**
      * 게시글 좋아요 조회
      */
-
+    public List<PostLikesDto> findPostLike(Long postId){
+        List<PostLikes> postLikesList = postLikesRepository.findByPostId(postId);
+        return postLikesList.stream()
+                .map(pl -> new PostLikesDto(postId, pl.getLikers().getEmail()))
+                .collect(Collectors.toList());
+    }
     /**
      * 댓글 좋아요 조회
      *
