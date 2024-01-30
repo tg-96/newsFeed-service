@@ -13,11 +13,7 @@ public class MailController {
     private final MailService mailService;
 
     /**
-     *
-     * 메일보냄
-     *
-     * @return
-     * 인증번호
+     * 메일로 인증번호 보냄
      */
     @PostMapping("/mail/{mail}")
     public String MailSend(@PathVariable("mail") String mail){

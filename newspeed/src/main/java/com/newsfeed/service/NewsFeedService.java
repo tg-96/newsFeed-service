@@ -62,11 +62,11 @@ public class NewsFeedService {
         return fromEmail + " 님이 " + toEmail + " 님을 팔로우 했습니다.";
     }
     /**
-     * 팔로우 수 조회
+     * 팔로우 조회
      */
 
     /**
-     * 팔로워 수 조회
+     * 팔로워 조회
      */
 
     /**
@@ -181,7 +181,7 @@ public class NewsFeedService {
     }
 
     /**
-     * 게시글 댓글 조회
+     * 댓글 조회
      */
     public List<CommentsResponseDto> findCommentsByPost(Long postId) {
         List<Comments> comments = commentsRepository.findByPostId(postId);
@@ -227,6 +227,17 @@ public class NewsFeedService {
     }
 
     /**
+     * 게시글 좋아요 조회
+     */
+    public List<PostLikesDto> findPostLike(Long postId){
+        List<PostLikes> postLikesList = postLikesRepository.findByPostId(postId);
+
+        return postLikesList.stream()
+                .map(pl -> new PostLikesDto(postId, pl.getLikers().getEmail()))
+                .collect(Collectors.toList());
+    }
+
+    /**
      * 댓글 좋아요
      */
     @Transactional
@@ -262,6 +273,20 @@ public class NewsFeedService {
     }
 
     /**
+     * 댓글 좋아요 조회
+     */
+    public List<CommentLikesDto> findCommentLike(Long commentId){
+        List<CommentLikes> commentLikesList = commentLikesRepository.findCommentLikesByCommentsId(commentId);
+        Optional<Comments> comments = commentsRepository.findById(commentId);
+
+        int count = commentLikesList.size();
+
+        return commentLikesList.stream()
+                .map(cl -> new CommentLikesDto(commentId,comments.get().getWriter().getEmail(),count))
+                .collect(Collectors.toList());
+    }
+
+    /**
      * 나의 활동 조회
      */
     public List<ActivitiesDto> findActivities(String email){
@@ -275,28 +300,4 @@ public class NewsFeedService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * 게시글 좋아요 조회
-     */
-    public List<PostLikesDto> findPostLike(Long postId){
-        List<PostLikes> postLikesList = postLikesRepository.findByPostId(postId);
-
-        return postLikesList.stream()
-                .map(pl -> new PostLikesDto(postId, pl.getLikers().getEmail()))
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * 댓글 좋아요 조회
-     */
-    public List<CommentLikesDto> findCommentLike(Long commentId){
-        List<CommentLikes> commentLikesList = commentLikesRepository.findCommentLikesByCommentsId(commentId);
-        Optional<Comments> comments = commentsRepository.findById(commentId);
-
-        int count = commentLikesList.size();
-
-        return commentLikesList.stream()
-                .map(cl -> new CommentLikesDto(commentId,comments.get().getWriter().getEmail(),count))
-                .collect(Collectors.toList());
-    }
 }
