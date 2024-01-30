@@ -92,7 +92,10 @@ public class NewsFeedController {
     /**
      * 댓글별 좋아요 조회
      */
-
+    @GetMapping("/comments/like/{commentId}")
+    public List<CommentLikesDto> findCommentLikes(@PathVariable("commentId")Long commentId){
+        return newsFeedService.findCommentLike(commentId);
+    }
     /**
      * 댓글 좋아요
      */

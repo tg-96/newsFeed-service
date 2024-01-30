@@ -274,9 +274,15 @@ public class NewsFeedService {
                 .map(pl -> new PostLikesDto(postId, pl.getLikers().getEmail()))
                 .collect(Collectors.toList());
     }
+
     /**
      * 댓글 좋아요 조회
-     *
      */
-
+    public List<CommentLikesDto> findCommentLike(Long commentId){
+        List<CommentLikes> commentLikesList = commentLikesRepository.findCommentLikesByCommentsId(commentId);
+        Optional<Comments> comments = commentsRepository.findById(commentId);
+        return commentLikesList.stream()
+                .map(cl -> new CommentLikesDto(commentId,comments.get().getWriter().getEmail()))
+                .collect(Collectors.toList());
+    }
 }
