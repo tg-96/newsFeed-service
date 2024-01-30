@@ -2,6 +2,7 @@ package com.newsfeed.controller;
 
 import com.newsfeed.dto.JoinDto;
 import com.newsfeed.dto.MemberDto;
+import com.newsfeed.dto.PwdUpdateDto;
 import com.newsfeed.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,25 +18,33 @@ public class MemberController {
     /**
      * 회원 정보 조회
      */
-
+    @GetMapping("/member")
+    public MemberDto findMember(){
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return memberService.findMember(email);
+    }
 
     /**
      *유저 정보 업데이트
      */
     @PatchMapping("/member")
-    public void updateMember(@RequestBody MemberDto memberDto) {
+    public ResponseEntity<Void> updateMember(@RequestBody MemberDto memberDto) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         memberService.updateProfile(memberDto,email);
+
+        return ResponseEntity.ok().build();
     }
 
     /**
      * 비밀번호 업데이트
      **/
     @PutMapping("/member/pwd")
-    public void updatePwd(@RequestParam String password){
+    public ResponseEntity<Void> updatePwd(@RequestBody PwdUpdateDto pwdUpdateDto){
+        System.out.println("password = " + pwdUpdateDto.getPassword());
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        memberService.updatePassword(password,email);
+        System.out.println("email = " + email);
+        memberService.updatePassword(pwdUpdateDto.getPassword(), email);
+        return ResponseEntity.ok().build();
     }
 
     /**

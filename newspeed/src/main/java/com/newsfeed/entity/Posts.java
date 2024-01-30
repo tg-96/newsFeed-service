@@ -15,7 +15,7 @@ import java.util.Set;
 @NoArgsConstructor
 public class Posts extends BaseTimeEntity {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")
     private Long id;
     private String content;

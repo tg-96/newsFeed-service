@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class PostLikes {
-    @GeneratedValue
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "postLike_id")
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)

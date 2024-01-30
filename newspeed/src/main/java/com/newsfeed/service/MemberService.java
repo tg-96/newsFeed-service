@@ -6,6 +6,7 @@ import com.newsfeed.entity.Member;
 import com.newsfeed.repository.FollowsRepository;
 import com.newsfeed.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,13 @@ public class MemberService {
     private final FollowsRepository followRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    public MemberDto findMember(String email){
+        Optional<Member> member = memberRepository.findByEmail(email);
+        if(member.isEmpty()){
+            throw new RuntimeException("조회한 멤버 정보가 없습니다.");
+        }
+        return new MemberDto(member.get().getName(),member.get().getImage(),member.get().getIntroduction());
+    }
     @Transactional
     public void updateProfile(MemberDto memberDto,String email){
         Member member = memberRepository.findByEmail(email).get();
@@ -36,7 +44,7 @@ public class MemberService {
     @Transactional
     public void updatePassword(String password,String email){
         Member member = memberRepository.findByEmail(email).get();
-        member.changePassword(password);
+        member.changePassword(bCryptPasswordEncoder.encode(password));
     }
 
     public Member findMemberByEmail(String email){
@@ -64,5 +72,6 @@ public class MemberService {
         Member newMember = new Member(name, email, bCryptPasswordEncoder.encode(password),role);
         memberRepository.save(newMember);
     }
+
 
 }
