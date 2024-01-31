@@ -3,8 +3,8 @@ spring:
     activate:
       on-profile: local
   datasource:
-    url: jdbc:mysql://localhost:3306/mysqldb?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul
-    username: ${USERNAME}
+    url: jdbc:mysql://localhost:3306/mysqldb?useSSL=false&allowPublicKeyRetrieval=true
+    username: root
     password: ${PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
