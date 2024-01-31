@@ -27,7 +27,28 @@ spring:
           starttls:
             enable: true
     protocol: smtps
+
+#file upload max size (파일 업로드 크기 설정)
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+#jwt secret 키
 jwt:
   secret: ${SECRET_KEY}
 
+#AWS Account Credentials
+cloud:
+  aws:
+    credentials:
+      accessKey: ${ACCESS_KEY}
+      secretKey: ${S3_SECRET_KEY}
+
+#AWS S3 bucket Info ( S3 버킷정보)
+    s3:
+      bucket: preorder-service-bucket
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
 
