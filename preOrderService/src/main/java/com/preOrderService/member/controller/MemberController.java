@@ -30,7 +30,7 @@ public class MemberController {
      *유저 정보 업데이트
      */
     @PatchMapping("/member")
-    public ResponseEntity<Void> updateMember(@RequestBody MemberDto memberDto,
+    public ResponseEntity<Void> updateMember(@RequestPart(value = "memberDto") MemberDto memberDto,
                                              @RequestPart(value = "file")MultipartFile multipartFile) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 

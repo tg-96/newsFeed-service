@@ -3,7 +3,6 @@ package com.preOrderService.member.service;
 import com.preOrderService.member.dto.JoinDto;
 import com.preOrderService.newsFeed.dto.MemberDto;
 import com.preOrderService.member.entity.Member;
-import com.preOrderService.newsFeed.repository.FollowsRepository;
 import com.preOrderService.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -17,7 +16,6 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class MemberService {
     private final MemberRepository memberRepository;
-    private final FollowsRepository followRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public MemberDto findMember(String email){
