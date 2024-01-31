@@ -252,7 +252,7 @@ public class NewsFeedService {
         }
 
         //댓글 좋아요 저장
-        CommentLikes commentLikes = new CommentLikes(comment.get(),email);
+        CommentLikes commentLikes = new CommentLikes(comment.get(),member.get());
         CommentLikes save = commentLikesRepository.save(commentLikes);
 
         //댓글 좋아요, 팔로워 활동에 남기기

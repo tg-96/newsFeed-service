@@ -17,6 +17,7 @@ public class Activities extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member owner;
+    @Enumerated(EnumType.STRING)
     private ActivityType type;
     private String notification;
     private String actorEmail;

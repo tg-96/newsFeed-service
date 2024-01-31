@@ -175,7 +175,7 @@ class NewsFeedServiceTest {
         newsFeedService.postLike("bbb@aaa", posts.get(0).getId());
 
         //then
-        PostLikes postLike = postLikesRepository.findByPostId(posts.get(0).getId()).get();
+        PostLikes postLike = postLikesRepository.findByPostId(posts.get(0).getId()).get(0);
         assertThat(postLike.getLikers().getEmail()).isEqualTo("bbb@aaa");
 
         List<Activities> activities = activitiesRepository.findByOwnerId(aaa.getId());
