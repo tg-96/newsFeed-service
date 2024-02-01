@@ -56,21 +56,28 @@ subprojects {
     }
 }
 
+project(':commonService'){
+    bootJar {enabled = true}
+    jar {enabled = false}
+    dependencies {
+    }
+}
+
 project(':userService'){
     bootJar {enabled= true}
     jar {enabled = false}
 
     dependencies {
-
+        implementation project(':commonService') // common 모듈에 대한 의존성
     }
 }
 
-project(':activityService'){
+project(':commonService'){
     bootJar {enabled= true}
     jar {enabled = false}
 
     dependencies {
-
+        implementation project(':commonService') // common 모듈에 대한 의존성
     }
 }
 
@@ -79,7 +86,7 @@ project(':newsFeedService'){
     jar {enabled = false}
 
     dependencies {
-
+        implementation project(':commonService') // common 모듈에 대한 의존성
     }
 }
 

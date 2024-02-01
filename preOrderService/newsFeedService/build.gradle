@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group 'jeong'
+group 'preOrderService'
 version '0.0.1-SNAPSHOT'
 
 repositories {
