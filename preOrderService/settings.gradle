@@ -1,1 +1,5 @@
 rootProject.name = 'preOrderService'
+include 'userService'
+include 'activityService'
+include 'newsFeedService'
+
