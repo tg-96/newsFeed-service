@@ -1,20 +1,28 @@
-plugins {
-    id 'java'
-    id 'org.springframework.boot' version '3.2.2' apply false
-    id 'io.spring.dependency-management' version '1.1.4' apply false
+buildscript {
+    ext {
+        springBootVersion = '3.2.2'    // spring boot 버전 확인
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:3.2.2"
+        classpath "io.spring.gradle:dependency-management-plugin:1.1.4"    // gradle 버전 확인
+    }
 }
 
-group = 'preOrderService'
-version = '0.0.1-SNAPSHOT'
 
 subprojects {
     apply plugin: 'java'
     apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
 
-    java {
-        sourceCompatibility = '17'
-    }
+    group = 'preOrderService'
+    version = '0.0.1-SNAPSHOT'
+
+    sourceCompatibility = '17'
+    targetCompatibility = '17'
+    compileJava.options.encoding = 'UTF-8'
 
     repositories {
         mavenCentral()
@@ -29,6 +37,7 @@ subprojects {
         annotationProcessor 'org.projectlombok:lombok'
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
         testImplementation 'org.springframework.security:spring-security-test'
+        runtimeOnly 'com.mysql:mysql-connector-j'
         // JJWT (JSON Web Token for Java)
         implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
         runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
@@ -40,10 +49,37 @@ subprojects {
         // AWS S3
         implementation 'io.awspring.cloud:spring-cloud-starter-aws:2.3.1'
 
-        // 기타 의존성
     }
 
-    tasks.named('test') {
+    test {
         useJUnitPlatform()
     }
 }
+
+project(':userService'){
+    bootJar {enabled= true}
+    jar {enabled = false}
+
+    dependencies {
+
+    }
+}
+
+project(':activityService'){
+    bootJar {enabled= true}
+    jar {enabled = false}
+
+    dependencies {
+
+    }
+}
+
+project(':newsFeedService'){
+    bootJar {enabled= true}
+    jar {enabled = false}
+
+    dependencies {
+
+    }
+}
+
