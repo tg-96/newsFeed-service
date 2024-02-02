@@ -10,13 +10,15 @@ import java.util.Map;
  */
 @Service
 public class ToMemberService {
+    //base url 설정
+    WebClient memberClient = WebClient.builder()
+            .baseUrl("http://localhost:8080")
+            .build();
+
     /**
      * 현재 로그인중인 멤버 id 조회
      */
-    public Map<String,Object> getCurrentMember(String token) {
-        WebClient memberClient = WebClient.builder()
-                .baseUrl("http://localhost:8080")
-                .build();
+    public Map<String, Object> getCurrentMember(String token) {
 
         return memberClient
                 .get()
@@ -34,11 +36,7 @@ public class ToMemberService {
     /**
      * Email로 회원 정보 조회
      */
-    public Map<String,Object> getMemberByEmail(String token, String email) {
-        WebClient memberClient = WebClient.builder()
-                .baseUrl("http://localhost:8080")
-                .build();
-
+    public Map<String, Object> getMemberByEmail(String token, String email) {
         //현재 로그인한 사용자
         return memberClient
                 .get()

@@ -7,6 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class ActivitiesDto {
+public class ResponseActivitiesDto {
     private String notification;
 }

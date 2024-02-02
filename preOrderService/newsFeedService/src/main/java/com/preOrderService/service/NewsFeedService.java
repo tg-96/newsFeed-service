@@ -29,7 +29,7 @@ public class NewsFeedService {
     private final PostLikesRepository postLikesRepository;
     private final CommentLikesRepository commentLikesRepository;
     private final ToMemberService toMemberService;
-    private final ToActivityService activityService;
+    private final ToActivityService toActivityService;
     /**
      * 팔로우 & 언팔로우
      * 팔로우 중이 아니면 팔로우하고,
@@ -37,8 +37,6 @@ public class NewsFeedService {
      */
     @Transactional
     public String changeFollow(String toEmail,String token) {
-        //memberService에 API 요청
-
         //사용자
         Map<String, Object> fromMember = toMemberService.getCurrentMember(token);
 
@@ -54,18 +52,17 @@ public class NewsFeedService {
         //팔로우 상대면 팔로우 취소
         if (relation.isPresent()) {
             followRepository.delete(relation.get());
-            String notification = fromEmail + " 님이 " + toEmail + " 님을 팔로우 취소 했습니다.";
         }
 
         //팔로우 상태 아니면 팔로우
-        else{
+        else {
+            //팔로우
             followRepository.save(new Follows(fromMemberId.longValue(), toMemberId.longValue()));
+
+            //팔로워들의 활동 목록에 추가
+            List<Long> followerList = followRepository.findFollowerList(fromMemberId.longValue());
+            toActivityService.addActivities(token, followerList, fromEmail, toEmail, "FOLLOWS");
         }
-
-        //팔로워들의 활동 목록에 추가
-        List<Long> followerList = followRepository.findFollowerList(fromMemberId.longValue());
-
-
         return fromEmail + " 님이 " + toEmail + " 님을 팔로우 했습니다.";
     }
     /**

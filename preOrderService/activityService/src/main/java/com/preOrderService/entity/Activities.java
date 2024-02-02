@@ -21,18 +21,18 @@ public class Activities extends BaseTimeEntity {
     private String toEmail;
 
     @Builder
-    public Activities(Long memberId,ActivityType type, String actorEmail, String targetEmail) {
+    public Activities(Long memberId,ActivityType type, String fromEmail, String toEmail) {
         this.memberId = memberId;
         this.type = type;
-        this.fromEmail = actorEmail;
-        this.toEmail = targetEmail;
+        this.fromEmail = fromEmail;
+        this.toEmail = toEmail;
 
         switch (type){
-            case FOLLOWS -> notification = actorEmail+"님이 "+targetEmail+"을 팔로우 했습니다.";
-            case COMMENTS -> notification = actorEmail+"님이 "+targetEmail+"님의 글에 댓글을 작성했습니다.";
-            case COMMENT_LIKE -> notification = actorEmail+"님이 "+targetEmail+"님의 댓글을 좋아합니다.";
-            case POSTS -> notification = actorEmail+"님이 게시물을 작성 했습니다.";
-            case POST_LIKES -> notification = actorEmail+"님이 "+targetEmail+"님의 글을 좋아합니다.";
+            case FOLLOWS -> notification = fromEmail+"님이 "+toEmail+"을 팔로우 했습니다.";
+            case COMMENTS -> notification = fromEmail+"님이 "+toEmail+"님의 글에 댓글을 작성했습니다.";
+            case COMMENT_LIKE -> notification = fromEmail+"님이 "+toEmail+"님의 댓글을 좋아합니다.";
+            case POSTS -> notification = fromEmail+"님이 게시물을 작성 했습니다.";
+            case POST_LIKES -> notification = fromEmail+"님이 "+toEmail+"님의 글을 좋아합니다.";
         }
     }
     // 내 포스트에 댓글을 작성했을 경우 notificaion 변경
