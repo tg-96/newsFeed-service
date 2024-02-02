@@ -26,8 +26,8 @@ public class InternalMemberApi {
      * 이메일로 멤버 정보 조회
      */
     @GetMapping("/member/{email}")
-    public MemberAdaptor getMember(@RequestHeader("Authorization")String token, String email){
-        internalMemberService.
+    public MemberAdaptor getMemberByEmail(@RequestHeader("Authorization")String token,@PathVariable String email){
+        return internalMemberService.getMemberByEmail(token,email);
     }
 
 }

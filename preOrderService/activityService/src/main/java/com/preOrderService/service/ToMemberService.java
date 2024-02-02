@@ -7,6 +7,7 @@ import java.util.Map;
 
 /**
  * member service API 요청
+ * port :8080
  */
 @Service
 public class ToMemberService {
@@ -34,7 +35,7 @@ public class ToMemberService {
     /**
      * Email로 회원 정보 조회
      */
-    public Map<String,Object> getMemberByEmail(String token, String email) {
+    public Map<String,Object> getMemberIdByEmail(String token, String email) {
         WebClient memberClient = WebClient.builder()
                 .baseUrl("http://localhost:8080")
                 .build();
@@ -52,9 +53,5 @@ public class ToMemberService {
                 .bodyToMono(Map.class)
                 .block();
     }
-    /**
-     * 멤버 정보
-     */
-
 
 }

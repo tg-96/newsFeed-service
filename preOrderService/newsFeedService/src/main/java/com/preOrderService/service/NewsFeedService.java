@@ -28,62 +28,43 @@ public class NewsFeedService {
     private final CommentsRepository commentsRepository;
     private final PostLikesRepository postLikesRepository;
     private final CommentLikesRepository commentLikesRepository;
-
+    private final ToMemberService toMemberService;
+    private final ToActivityService activityService;
     /**
      * 팔로우 & 언팔로우
      * 팔로우 중이 아니면 팔로우하고,
      * 팔로우 중이면 언팔로우 한다.
      */
     @Transactional
-    public String changeFollow(String toEmail,String auth) {
+    public String changeFollow(String toEmail,String token) {
         //memberService에 API 요청
-        WebClient memberClient = WebClient.builder()
-                .baseUrl("http://localhost:8080")
-                .build();
-
-        //현재 로그인한 사용자
-        Map<String, Long> response =
-                memberClient
-                        .get()
-                        .uri(uriBuilder ->
-                                uriBuilder
-                                        .path("/member")
-                                        .build())
-                        .header("Authorization",auth)
-                        .retrieve()
-                        .bodyToMono(Map.class)
-                        .block();
-
-        // json은 숫자일 경우 Long,Intger 구분 없음. 숫자 크기에 따라 Integer, Long으로 반환, 변환해주어야함.
-        Number id = (Number)response.get("id");
 
         //사용자
-        Long fromMemberId = memberRepository.findByEmail(fromEmail).get().getId();
+        Map<String, Object> fromMember = toMemberService.getCurrentMember(token);
 
         //사용자가 팔로우할 대상
-        Long toMemberId = memberRepository.findByEmail(toEmail).get().getId();
+        Map<String, Object> toMember = toMemberService.getMemberByEmail(token, toEmail);
+        Number fromMemberId = (Number)fromMember.get("id");
+        Number toMemberId = (Number)toMember.get("id");
 
         //follow 관계 불러옴
-        Optional<Follows> relation = followRepository.isFollow(fromMemberId, toMemberId);
+        Optional<Follows> relation = followRepository.isFollow(fromMemberId.longValue(), toMemberId.longValue());
+        String fromEmail = (String)fromMember.get("email");
 
         //팔로우 상대면 팔로우 취소
         if (relation.isPresent()) {
             followRepository.delete(relation.get());
-            return fromEmail + " 님이 " + toEmail + " 님을 팔로우 취소 했습니다.";
+            String notification = fromEmail + " 님이 " + toEmail + " 님을 팔로우 취소 했습니다.";
         }
 
         //팔로우 상태 아니면 팔로우
-        followRepository.save(new Follows(fromMemberId, toMemberId));
-
+        else{
+            followRepository.save(new Follows(fromMemberId.longValue(), toMemberId.longValue()));
+        }
 
         //팔로워들의 활동 목록에 추가
-        List<Long> followerList = followRepository.findFollowerList(fromMemberId);
-        followerList.stream().forEach(id -> memberRepository.findById(id)
-                .ifPresent(m -> {
-                    Activities activities = new Activities(m, ActivityType.FOLLOWS, fromEmail, toEmail);
-                    activitiesRepository.save(activities);
-                })
-        );
+        List<Long> followerList = followRepository.findFollowerList(fromMemberId.longValue());
+
 
         return fromEmail + " 님이 " + toEmail + " 님을 팔로우 했습니다.";
     }

@@ -17,15 +17,15 @@ public class Activities extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private ActivityType type;
     private String notification;
-    private String actorEmail;
-    private String targetEmail;
+    private String fromEmail;
+    private String toEmail;
 
     @Builder
-    public Activities(Long member_id,ActivityType type, String actorEmail, String targetEmail) {
-        this.memberId = member_id;
+    public Activities(Long memberId,ActivityType type, String actorEmail, String targetEmail) {
+        this.memberId = memberId;
         this.type = type;
-        this.actorEmail = actorEmail;
-        this.targetEmail = targetEmail;
+        this.fromEmail = actorEmail;
+        this.toEmail = targetEmail;
 
         switch (type){
             case FOLLOWS -> notification = actorEmail+"님이 "+targetEmail+"을 팔로우 했습니다.";

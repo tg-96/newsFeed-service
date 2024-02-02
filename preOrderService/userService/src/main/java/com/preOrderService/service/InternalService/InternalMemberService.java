@@ -41,7 +41,18 @@ public class InternalMemberService {
      * 이메일에 해당하는 멤버 정보 조회
      */
     public MemberAdaptor getMemberByEmail(String token, String email){
+        //토큰 유효기간 검증
+        if(jwtUtil.isExpired(token)){
+            throw new RuntimeException("유효기간이 만료되었습니다.");
+        }
+        System.out.println("token = " + token);
 
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("멤버 정보가 없습니다."));
+
+        return new MemberAdaptor(
+                member.getId(), member.getEmail(), member.getPassword(), member.getImage(), member.getIntroduction()
+        );
     }
 
 }
