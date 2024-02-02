@@ -1,6 +1,7 @@
 package com.preOrderService.entity;
 
 import com.preOrderService.common.BaseTimeEntity;
+import com.preOrderService.entity.Member;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
