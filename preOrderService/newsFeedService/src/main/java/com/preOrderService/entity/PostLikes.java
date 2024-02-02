@@ -1,6 +1,5 @@
 package com.preOrderService.entity;
 
-import com.preOrderService.entity.Member;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,12 +15,10 @@ public class PostLikes {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private Posts posts;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member likers;
+    private Long likeMemberId;
 
-    public PostLikes(Posts posts, Member liker) {
+    public PostLikes(Posts posts, Long likeMemberId) {
         this.posts = posts;
-        this.likers = liker;
+        this.likeMemberId = likeMemberId;
     }
 }

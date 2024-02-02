@@ -1,7 +1,5 @@
 package com.preOrderService.entity;
 
-import com.preOrderService.common.BaseTimeEntity;
-import com.preOrderService.entity.Member;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,9 +13,7 @@ public class Activities extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "activity_id")
     private Long id;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member owner;
+    private Long memberId;
     @Enumerated(EnumType.STRING)
     private ActivityType type;
     private String notification;
@@ -25,8 +21,8 @@ public class Activities extends BaseTimeEntity {
     private String targetEmail;
 
     @Builder
-    public Activities(Member member,ActivityType type, String actorEmail, String targetEmail) {
-        this.owner = member;
+    public Activities(Long member_id,ActivityType type, String actorEmail, String targetEmail) {
+        this.memberId = member_id;
         this.type = type;
         this.actorEmail = actorEmail;
         this.targetEmail = targetEmail;

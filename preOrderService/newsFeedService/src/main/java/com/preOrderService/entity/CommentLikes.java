@@ -15,12 +15,10 @@ public class CommentLikes {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "comment_id")
     private Comments comments;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member likers;
+    private Long likeMemberId;
 
-    public CommentLikes(Comments comments,Member likers) {
+    public CommentLikes(Comments comments,Long likeMemberId) {
         this.comments = comments;
-        this.likers = likers;
+        this.likeMemberId = likeMemberId;
     }
 }

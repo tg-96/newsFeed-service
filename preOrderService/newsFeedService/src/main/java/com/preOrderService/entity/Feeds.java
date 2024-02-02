@@ -1,7 +1,6 @@
 package com.preOrderService.entity;
 
 import com.preOrderService.common.BaseTimeEntity;
-import com.preOrderService.entity.Member;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,15 +13,13 @@ public class Feeds extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "feeds_id")
     private Long id;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member owner;
+    private Long memberId;
     @ManyToOne
     @JoinColumn(name = "post_id")
     private Posts post;
 
-    public Feeds(Posts post,Member owner) {
+    public Feeds(Posts post,Long memberId) {
         this.post = post;
-        this.owner = owner;
+        this.memberId = memberId;
     }
 }

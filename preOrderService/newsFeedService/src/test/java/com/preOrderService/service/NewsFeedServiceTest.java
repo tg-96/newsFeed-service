@@ -138,7 +138,7 @@ class NewsFeedServiceTest {
         //then
         List<Comments> comments = commentsRepository.findByPostId(postId);
         assertThat(comments.get(0).getText()).isEqualTo("댓글을 작성했다.");
-        assertThat(comments.get(0).getWriter().getEmail()).isEqualTo("bbb@aaa");
+        assertThat(comments.get(0).getWriteMemberId().getEmail()).isEqualTo("bbb@aaa");
 
         //팔로워의 활동에 추가 여부 확인
         Member follower = memberService.findMemberByEmail("aaa@aaa");
@@ -177,7 +177,7 @@ class NewsFeedServiceTest {
 
         //then
         PostLikes postLike = postLikesRepository.findByPostId(posts.get(0).getId()).get(0);
-        assertThat(postLike.getLikers().getEmail()).isEqualTo("bbb@aaa");
+        assertThat(postLike.getLikeMemberId().getEmail()).isEqualTo("bbb@aaa");
 
         List<Activities> activities = activitiesRepository.findByOwnerId(aaa.getId());
         for(Activities activity : activities){
@@ -215,7 +215,7 @@ class NewsFeedServiceTest {
         //then
         Optional<Comments> comment = commentsRepository.findById(commentid);
         CommentLikes commentLikes = commentLikesRepository.findCommentLikesByLikeUsersEmail("aaa@aaa");
-        assertThat(commentLikes.getComments().getWriter().getEmail()).isEqualTo("bbb@aaa");
+        assertThat(commentLikes.getComments().getWriteMemberId().getEmail()).isEqualTo("bbb@aaa");
         assertThat(commentLikes.getComments().getText()).isEqualTo("댓글을 작성했습니다.");
 
         List<Activities> activities = activitiesRepository.findByOwnerId(ccc.getId());

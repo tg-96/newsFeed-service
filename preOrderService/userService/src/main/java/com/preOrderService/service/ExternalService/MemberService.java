@@ -1,4 +1,4 @@
-package com.preOrderService.service;
+package com.preOrderService.service.ExternalService;
 
 import com.preOrderService.entity.Member;
 import com.preOrderService.dto.JoinDto;
@@ -17,7 +17,6 @@ import java.util.Optional;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-
     public MemberDto findMember(String email){
         Optional<Member> member = memberRepository.findByEmail(email);
         if(member.isEmpty()){

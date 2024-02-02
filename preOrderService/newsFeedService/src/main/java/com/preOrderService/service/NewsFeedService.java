@@ -11,8 +11,10 @@ import com.preOrderService.newsFeed.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -21,8 +23,6 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class NewsFeedService {
     private final FollowsRepository followRepository;
-    private final MemberRepository memberRepository;
-    private final ActivitiesRepository activitiesRepository;
     private final FeedsRepository feedsRepository;
     private final PostsRepository postsRepository;
     private final CommentsRepository commentsRepository;
@@ -35,7 +35,28 @@ public class NewsFeedService {
      * 팔로우 중이면 언팔로우 한다.
      */
     @Transactional
-    public String changeFollow(String fromEmail, String toEmail) {
+    public String changeFollow(String toEmail,String auth) {
+        //memberService에 API 요청
+        WebClient memberClient = WebClient.builder()
+                .baseUrl("http://localhost:8080")
+                .build();
+
+        //현재 로그인한 사용자
+        Map<String, Long> response =
+                memberClient
+                        .get()
+                        .uri(uriBuilder ->
+                                uriBuilder
+                                        .path("/member")
+                                        .build())
+                        .header("Authorization",auth)
+                        .retrieve()
+                        .bodyToMono(Map.class)
+                        .block();
+
+        // json은 숫자일 경우 Long,Intger 구분 없음. 숫자 크기에 따라 Integer, Long으로 반환, 변환해주어야함.
+        Number id = (Number)response.get("id");
+
         //사용자
         Long fromMemberId = memberRepository.findByEmail(fromEmail).get().getId();
 
@@ -192,7 +213,7 @@ public class NewsFeedService {
         List<Comments> comments = commentsRepository.findByPostId(postId);
 
         return comments.stream().map(c ->
-                new CommentsResponseDto(c.getId(),c.getWriter().getEmail(), c.getWriter().getName(), c.getText())
+                new CommentsResponseDto(c.getId(),c.getWriteMemberId().getEmail(), c.getWriteMemberId().getName(), c.getText())
         ).collect(Collectors.toList());
     }
 
@@ -238,7 +259,7 @@ public class NewsFeedService {
         List<PostLikes> postLikesList = postLikesRepository.findByPostId(postId);
 
         return postLikesList.stream()
-                .map(pl -> new PostLikesDto(postId, pl.getLikers().getEmail()))
+                .map(pl -> new PostLikesDto(postId, pl.getLikeMemberId().getEmail()))
                 .collect(Collectors.toList());
     }
 
@@ -264,13 +285,13 @@ public class NewsFeedService {
         List<Long> followerList = followRepository.findFollowerList(member.get().getId());
         followerList.stream().forEach(id ->
                 memberRepository.findById(id).ifPresent(m -> {
-                    Activities activities = new Activities(m, ActivityType.COMMENT_LIKE, email,comment.get().getWriter().getEmail() );
+                    Activities activities = new Activities(m, ActivityType.COMMENT_LIKE, email,comment.get().getWriteMemberId().getEmail() );
                     activitiesRepository.save(activities);
                 })
         );
 
         //댓글 주인의 활동에 남기기
-        Activities activities = new Activities(comment.get().getWriter(), ActivityType.COMMENT_LIKE,email,comment.get().getWriter().getEmail());
+        Activities activities = new Activities(comment.get().getWriteMemberId(), ActivityType.COMMENT_LIKE,email,comment.get().getWriteMemberId().getEmail());
         String notification = email+"님이 내 댓글을 좋아합니다.";
         activitiesRepository.save(activities);
 
@@ -287,7 +308,7 @@ public class NewsFeedService {
         int count = commentLikesList.size();
 
         return commentLikesList.stream()
-                .map(cl -> new CommentLikesDto(commentId,comments.get().getWriter().getEmail(),count))
+                .map(cl -> new CommentLikesDto(commentId,comments.get().getWriteMemberId().getEmail(),count))
                 .collect(Collectors.toList());
     }
 

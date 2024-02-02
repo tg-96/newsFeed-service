@@ -1,7 +1,6 @@
 package com.preOrderService.entity;
 
 import com.preOrderService.common.BaseTimeEntity;
-import com.preOrderService.entity.Member;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,13 +16,11 @@ public class Posts extends BaseTimeEntity {
     private Long id;
     private String content;
     private String image;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member writer;
+    private Long writeMemberId;
     @Builder
-    public Posts(String content, String image, Member writer) {
+    public Posts(String content, String image, Long writeMemberId) {
         this.content = content;
         this.image = image;
-        this.writer = writer;
+        this.writeMemberId = writeMemberId;
     }
 }

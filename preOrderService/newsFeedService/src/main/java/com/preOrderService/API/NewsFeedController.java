@@ -1,11 +1,9 @@
-package com.preOrderService.controller;
+package com.preOrderService.API;
 
 import com.preOrderService.dto.*;
-import com.preOrderService.newsFeed.dto.*;
 import com.preOrderService.service.NewsFeedService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,11 +19,8 @@ public class NewsFeedController {
      * 팔로우
      */
     @PostMapping("/follow/{email}")
-    public ResponseEntity<Void> follow(@PathVariable("email") String toEmail) {
-        //현재 사용자 이메일
-        String fromEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        newsFeedService.changeFollow(fromEmail, toEmail);
+    public ResponseEntity<Void> follow(@PathVariable("email") String toEmail,@RequestHeader("Authorization")String auth) {
+        newsFeedService.changeFollow(toEmail,auth);
 
         return ResponseEntity.ok().build();
     }
@@ -43,14 +38,7 @@ public class NewsFeedController {
         return newsFeeds;
     }
 
-    /**
-     * 팔로우한 유저들의 활동 조회
-     */
-    @GetMapping("/activities")
-    public List<ActivitiesDto> getActivities() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return newsFeedService.findActivities(email);
-    }
+
 
     /**
      * 게시글 작성

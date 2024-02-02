@@ -1,17 +1,17 @@
-package com.preOrderService.controller;
+package com.preOrderService.API.ExternalApi;
 
 import com.preOrderService.dto.JoinDto;
 import com.preOrderService.dto.MemberDto;
 import com.preOrderService.dto.PwdUpdateDto;
-import com.preOrderService.service.AwsS3Service;
-import com.preOrderService.service.MemberService;
+import com.preOrderService.service.ExternalService.AwsS3Service;
+import com.preOrderService.service.ExternalService.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-@RestController
+@RestController("/api/member")
 @RequiredArgsConstructor
 public class MemberController {
     private final MemberService memberService;
@@ -20,7 +20,7 @@ public class MemberController {
     /**
      * 회원 정보 조회
      */
-    @GetMapping("/member")
+    @GetMapping
     public MemberDto findMember(){
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return memberService.findMember(email);
@@ -29,7 +29,7 @@ public class MemberController {
     /**
      *유저 정보 업데이트
      */
-    @PatchMapping("/member")
+    @PatchMapping
     public ResponseEntity<Void> updateMember(@RequestPart(value = "memberDto") MemberDto memberDto,
                                              @RequestPart(value = "file")MultipartFile multipartFile) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -48,7 +48,7 @@ public class MemberController {
     /**
      * 비밀번호 업데이트
      **/
-    @PutMapping("/member/pwd")
+    @PutMapping("/pwd")
     public ResponseEntity<Void> updatePwd(@RequestBody PwdUpdateDto pwdUpdateDto){
         System.out.println("password = " + pwdUpdateDto.getPassword());
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
