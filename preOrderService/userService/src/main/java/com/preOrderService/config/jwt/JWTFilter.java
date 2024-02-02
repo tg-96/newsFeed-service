@@ -1,7 +1,7 @@
 package com.preOrderService.config.jwt;
 
-import com.preOrderService.member.entity.Member;
-import com.preOrderService.config.security.CustomUserDetails;
+import com.preOrderService.config.CustomUserDetails;
+import com.preOrderService.entity.Member;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

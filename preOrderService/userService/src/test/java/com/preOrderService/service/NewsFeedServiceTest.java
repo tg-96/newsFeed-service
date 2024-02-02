@@ -1,13 +1,10 @@
 package com.preOrderService.service;
 
-import com.preOrderService.member.entity.Member;
-import com.preOrderService.member.service.MemberService;
+import com.preOrderService.entity.Member;
 import com.preOrderService.newsFeed.dto.CommentsDto;
 import com.preOrderService.newsFeed.dto.FeedsDto;
-import com.preOrderService.member.dto.JoinDto;
+import com.preOrderService.dto.JoinDto;
 import com.preOrderService.newsFeed.dto.PostsDto;
-import com.preOrderService.newsFeed.entity.*;
-import com.preOrderService.newsFeed.repository.*;
 import com.preOrderService.newsFeed.service.NewsFeedService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
