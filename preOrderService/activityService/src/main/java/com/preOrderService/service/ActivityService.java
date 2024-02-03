@@ -1,5 +1,6 @@
 package com.preOrderService.service;
 
+import com.preOrderService.config.JWTUtil;
 import com.preOrderService.dto.RequestActivitiesDto;
 import com.preOrderService.dto.ResponseActivitiesDto;
 import com.preOrderService.entity.Activities;
@@ -16,16 +17,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ActivityService {
     private final ActivitiesRepository activitiesRepository;
-    private final ToMemberService toMemberService;
-
     /**
      * 나의 활동 조회
      */
-    public List<ResponseActivitiesDto> findActivities(String token) {
-        Map<String, Object> currentMember = toMemberService.getCurrentMember(token);
-        // json은 숫자일 경우 Long,Intger 구분 없음. 숫자 크기에 따라 Integer,Long으로 반환, 변환해주어야함.
-        Number id = (Number)currentMember.get("id");
-        List<Activities> activities = activitiesRepository.findByOwnerId(id.longValue()); // integer -> Long 타입으로 변환
+    public List<ResponseActivitiesDto> findActivities(Long memberId) {
+        List<Activities> activities = activitiesRepository.findByOwnerId(memberId); // integer -> Long 타입으로 변환
         return activities.stream().map(activity -> new ResponseActivitiesDto(activity.getNotification()))
                 .collect(Collectors.toList());
     }
@@ -46,10 +42,13 @@ public class ActivityService {
                 break;
             case "COMMENTS":
                 activityType = ActivityType.COMMENTS;
+                break;
             case "POSTS":
                 activityType = ActivityType.POSTS;
+                break;
             case "POST_LIKES":
                 activityType = ActivityType.POST_LIKES;
+                break;
             default:
                 throw new RuntimeException("활동 타입이 올바르지 않습니다.");
         }
@@ -57,8 +56,8 @@ public class ActivityService {
         Activities activity = new Activities(
                 request.getMemberId(),
                 activityType,
-                request.getFromEmail(),
-                request.getToEmail()
+                request.getFromUserName(),
+                request.getToUserName()
         );
 
         activitiesRepository.save(activity);

@@ -1,4 +1,4 @@
-package com.preOrderService.API.ExternalApi;
+package com.preOrderService.api.external;
 
 import com.preOrderService.dto.JoinDto;
 import com.preOrderService.dto.MemberDto;
@@ -11,9 +11,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-@RestController("/api/member")
+@RestController
 @RequiredArgsConstructor
-public class MemberController {
+@RequestMapping("/api/member")
+public class ExternalMemberController {
     private final MemberService memberService;
     private final AwsS3Service awsS3Service;
 

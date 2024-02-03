@@ -16,6 +16,25 @@ public class ToMemberService {
             .build();
 
     /**
+     * memberId로 이름 조회
+     */
+    public String getMemberNameById(String token, Long memberId) {
+
+        Map map = memberClient
+                .get()
+                .uri(uriBuilder ->
+                        uriBuilder
+                                .path("/member").queryParam("id", memberId)
+                                .build())
+                .header("Authorization", token)
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block();
+        String name = (String) map.get("name");
+        return name;
+    }
+
+    /**
      * 현재 로그인중인 멤버 id 조회
      */
     public Map<String, Object> getCurrentMember(String token) {

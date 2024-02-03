@@ -34,15 +34,15 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) {
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
-        String username = customUserDetails.getUsername();
-
+        Long userId = customUserDetails.getUserId();
+        String userName = customUserDetails.getUsername();
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority auth = iterator.next();
         System.out.println("auth.getAuthority() = " + auth.getAuthority());
         String role = auth.getAuthority();
 
-        String token = jwtUtil.createJwt(username, role, 864000000L);
+        String token = jwtUtil.createJwt(userId, userName, role, 864000000L);
         System.out.println("token = " + token);
         /**
          * HTTP 인증 방식은 RFC 7235 정의에 따라 아래 인증 헤더 형태를 가져야 한다.

@@ -50,6 +50,13 @@ public class MemberService {
         }
         return member.get();
     }
+    public String findMemberNameById(Long memberId){
+        Optional<Member> member = memberRepository.findById(memberId);
+        if(member.isEmpty()){
+            throw new RuntimeException("회원 정보가 존재하지 않습니다.");
+        }
+        return member.get().getName();
+    }
 
     @Transactional
     public void join(JoinDto joinDto) {

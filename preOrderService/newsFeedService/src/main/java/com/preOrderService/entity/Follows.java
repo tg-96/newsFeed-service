@@ -12,11 +12,11 @@ public class Follows {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "follow_id")
     private Long id;
-    private Long fromUser;
-    private Long toUser;
+    private Long fromUserId;
+    private Long toUserId;
 
     public Follows(Long fromUser, Long toUser) {
-        this.fromUser = fromUser;
-        this.toUser = toUser;
+        this.fromUserId = fromUser;
+        this.toUserId = toUser;
     }
 }

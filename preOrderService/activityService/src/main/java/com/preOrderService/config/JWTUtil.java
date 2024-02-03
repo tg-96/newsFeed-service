@@ -1,4 +1,4 @@
-package com.preOrderService.config.jwt;
+package com.preOrderService.config;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -16,13 +16,13 @@ public class JWTUtil {
         byte[] byteSecretKey = Decoders.BASE64.decode(secret);
         key = Keys.hmacShaKeyFor(byteSecretKey);
     }
-    public String getUsername(String token){
+    public Long getUserId(String token){
         return Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
-                .get("username", String.class);
+                .get("userId", Long.class);
     }
     public String getRole(String token){
         return  Jwts.parserBuilder()
@@ -40,16 +40,5 @@ public class JWTUtil {
                 .parseClaimsJws(token)
                 .getBody()
                 .getExpiration().before(new Date());
-    }
-
-    public String createJwt(Long userId,String userName,String role,Long expiredMs){
-        return Jwts.builder()
-                .claim("userId",userId)
-                .claim("userName",userName)
-                .claim("role",role)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis()+expiredMs))
-                .signWith(key)
-                .compact();
     }
 }

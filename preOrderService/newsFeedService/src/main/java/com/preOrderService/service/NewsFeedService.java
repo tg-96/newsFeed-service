@@ -34,18 +34,9 @@ public class NewsFeedService {
      * 팔로우 중이면 언팔로우 한다.
      */
     @Transactional
-    public String changeFollow(String toEmail, String token) {
-        //사용자
-        Map<String, Object> fromMember = toMemberService.getCurrentMember(token);
-
-        //사용자가 팔로우할 대상
-        Map<String, Object> toMember = toMemberService.getMemberByEmail(token, toEmail);
-        Number fromMemberId = (Number) fromMember.get("id");
-        Number toMemberId = (Number) toMember.get("id");
-
+    public void changeFollow(String token, Long fromMemberId, Long toMemberId) {
         //follow 관계 불러옴
-        Optional<Follows> relation = followRepository.isFollow(fromMemberId.longValue(), toMemberId.longValue());
-        String fromEmail = (String) fromMember.get("email");
+        Optional<Follows> relation = followRepository.isFollow(fromMemberId, toMemberId);
 
         //팔로우 상대면 팔로우 취소
         if (relation.isPresent()) {
@@ -55,13 +46,15 @@ public class NewsFeedService {
         //팔로우 상태 아니면 팔로우
         else {
             //팔로우
-            followRepository.save(new Follows(fromMemberId.longValue(), toMemberId.longValue()));
+            followRepository.save(new Follows(fromMemberId, toMemberId));
 
-            //팔로워들의 활동 목록에 추가
-            List<Long> followerList = followRepository.findFollowerList(fromMemberId.longValue());
-            toActivityService.addActivities(token, followerList, fromEmail, toEmail, "FOLLOWS");
+            //팔로워 조회
+            List<Long> followerIdList = followRepository.findFollowerList(fromMemberId);
+            //멤버 이름 조회
+            String fromMemberName = toMemberService.getMemberNameById(token, fromMemberId);
+            String toMemberName = toMemberService.getMemberNameById(token, toMemberId);
+            toActivityService.addActivities(token, followerIdList, fromMemberName, toMemberName, "FOLLOWS");
         }
-        return fromEmail + " 님이 " + toEmail + " 님을 팔로우 했습니다.";
     }
     /**
      * 팔로우 조회
@@ -122,16 +115,16 @@ public class NewsFeedService {
         List<Long> followerIdList = followRepository.findFollowerList(memberId.longValue());
         followerIdList.stream().forEach(id -> {
             Map<String, Object> follower = toMemberService.getMemberById(token, id);
-            Number followerId= (Number)follower.get("id");
+            Number followerId = (Number) follower.get("id");
 
             feedsRepository.save(new Feeds(saved_posts, followerId.longValue()));
         });
 
         //현재 로그인한 멤버 이메일
-        String fromEmail = (String)currentMember.get("email");
+        String fromEmail = (String) currentMember.get("email");
 
         //내 팔로워들의 활동에 추가
-        toActivityService.addActivities(token,followerIdList,fromEmail,null,"POSTS");
+        toActivityService.addActivities(token, followerIdList, fromEmail, null, "POSTS");
 
     }
 
@@ -139,23 +132,22 @@ public class NewsFeedService {
      * 댓글 작성
      */
     @Transactional
-    public Long writeComments(String writerEmail, Long postId, CommentsDto commentsDto) {
-        // 댓글 작성
-        Optional<Member> writer = memberRepository.findByEmail(writerEmail);
-        if (writer.isEmpty()) {
-            throw new RuntimeException("댓쓴이가 존재하지 않습니다.");
-        }
+    public Long writeComments(String token, Long postId, CommentsDto commentsDto) {
+        // 멤버 정보 조회
+        Map<String, Object> currentMember = toMemberService.getCurrentMember(token);
+        Number memberId = (Number) currentMember.get("id");
 
         Optional<Posts> post = postsRepository.findById(postId);
         if (post.isEmpty()) {
             throw new RuntimeException("게시글이 존재하지 않습니다.");
         }
 
-        Comments comments = new Comments(writer.get(), post.get(), commentsDto.getText());
+        //댓글 추가
+        Comments comments = new Comments(memberId.longValue(), post.get(), commentsDto.getText());
         Comments save = commentsRepository.save(comments);
 
         // 팔로워 활동에 나의 댓글 활동 추가
-        List<Long> followerList = followRepository.findFollowerList(writer.get().getId());
+        List<Long> followerList = followRepository.findFollowerList(memberId.longValue());
         String targetEmail = post.get().getWriter().getEmail();
 
         followerList.stream().forEach(id -> {

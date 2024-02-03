@@ -1,4 +1,4 @@
-package com.preOrderService.API.ExternalApi;
+package com.preOrderService.api.external;
 
 import com.preOrderService.service.ExternalService.MailService;
 import lombok.RequiredArgsConstructor;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-public class MailController {
+public class ExternalMailController {
     private final MailService mailService;
 
     /**

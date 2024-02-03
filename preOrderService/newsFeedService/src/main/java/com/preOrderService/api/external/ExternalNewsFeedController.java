@@ -1,6 +1,8 @@
-package com.preOrderService.API;
+package com.preOrderService.api.external;
 
+import com.preOrderService.config.JWTUtil;
 import com.preOrderService.dto.*;
+import com.preOrderService.dto.request.RequestMemberDto;
 import com.preOrderService.service.NewsFeedService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -12,15 +14,22 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/newsFeed")
 @RequiredArgsConstructor
-public class NewsFeedController {
+public class ExternalNewsFeedController {
     private final NewsFeedService newsFeedService;
-
+    private final JWTUtil jwtUtil;
     /**
      * 팔로우
      */
-    @PostMapping("/follow/{email}")
-    public ResponseEntity<Void> follow(@PathVariable("email") String toEmail,@RequestHeader("Authorization")String token) {
-        newsFeedService.changeFollow(toEmail,token);
+    @PostMapping("/follow")
+    public ResponseEntity<Void> follow(@RequestBody RequestMemberDto request, @RequestHeader("Authorization") String token) {
+        //유효기간 만료확인
+        if(jwtUtil.isExpired(token)){
+            throw new RuntimeException("토큰이 유효하지 않습니다.");
+        }
+        Long fromMemberId = jwtUtil.getUserId(token);
+        Long toMemberId = request.getMemberId();
+
+        newsFeedService.changeFollow(token,fromMemberId,toMemberId);
 
         return ResponseEntity.ok().build();
     }
@@ -29,7 +38,7 @@ public class NewsFeedController {
      * 피드 조회
      */
     @GetMapping
-    public List<FeedsDto> getNewsFeeds(@RequestHeader("Authorization")String token) {
+    public List<FeedsDto> getNewsFeeds(@RequestHeader("Authorization") String token) {
         //뉴스피드 조회
         List<FeedsDto> newsFeeds = newsFeedService.getFeeds(token);
 
@@ -37,12 +46,11 @@ public class NewsFeedController {
     }
 
 
-
     /**
      * 게시글 작성
      */
     @PostMapping("/posts")
-    public ResponseEntity<Void> writePost(@RequestBody PostsDto postsDto,@RequestHeader("Authorization")String token) {
+    public ResponseEntity<Void> writePost(@RequestBody PostsDto postsDto, @RequestHeader("Authorization") String token) {
         newsFeedService.writePost(token, postsDto);
 
         return ResponseEntity.ok().build();
@@ -52,10 +60,10 @@ public class NewsFeedController {
      * 댓글 작성
      */
     @PostMapping("/comments/{postId}")
-    public ResponseEntity<Void> writeComments(@PathVariable("postId") Long postId,
+    public ResponseEntity<Void> writeComments(@RequestHeader("Authorization") String token,
+                                              @PathVariable("postId") Long postId,
                                               @RequestBody CommentsDto commentsDto) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        newsFeedService.writeComments(email, postId, commentsDto);
+        newsFeedService.writeComments(token, postId, commentsDto);
 
         return ResponseEntity.ok().build();
     }

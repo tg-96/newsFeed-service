@@ -22,15 +22,15 @@ public class ToActivityService {
      * 팔로워들의 activity에 활동 추가 요청
      * TODO: 팔로워 수가 많을 경우 API 요청이 너무 많음.
      */
-    public void addActivities(String token, List<Long> memberId, String fromEmail, String toEmail,String type) {
+    public void addActivities(String token, List<Long> followerId, String fromUserName, String toUserName,String type) {
 
         //body에 들어갈 내용 추가
         Map<String, Object> bodyMap = new HashMap<>();
-        bodyMap.put("fromEmail", fromEmail);
-        bodyMap.put("toEmail", toEmail);
+        bodyMap.put("fromUserName", fromUserName);
+        bodyMap.put("toUserName", toUserName);
         bodyMap.put("type", type);
 
-        memberId.stream().forEach(
+        followerId.stream().forEach(
                 id -> {
                     bodyMap.put("memberId", id);
                     activityClient

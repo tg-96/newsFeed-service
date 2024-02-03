@@ -11,7 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class RequestActivitiesDto {
     private Long memberId;
-    private String fromEmail;
-    private String toEmail;
+    private String fromUserName;
+    private String toUserName;
     private String type;
 }
