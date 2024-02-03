@@ -167,35 +167,24 @@ public class NewsFeedService {
          * 게시글 좋아요
          */
         @Transactional
-        public void postLike (String email, Long postId){
-            Optional<Member> member = memberRepository.findByEmail(email);
-            if (member.isEmpty()) {
-                throw new RuntimeException("좋아요한 멤버가 존재하지 않습니다.");
-            }
-
+        public void postLike (String token,Long memberId, Long postId){
             Optional<Posts> post = postsRepository.findById(postId);
             if (post.isEmpty()) {
                 throw new RuntimeException("좋아요한 게시글이 존재하지 않습니다.");
             }
+
             //좋아요 저장
-            PostLikes postLikes = new PostLikes(post.get(), member.get());
+            PostLikes postLikes = new PostLikes(post.get(), memberId);
             postLikesRepository.save(postLikes);
 
             //좋아요 활동 팔로워에 남기기
-            List<Long> followerList = followRepository.findFollowerList(member.get().getId());
-            followerList.stream().forEach(id ->
-                    memberRepository.findById(id).ifPresent(m -> {
-                        Activities activities = new Activities(m, ActivityType.POST_LIKES, email, post.get().getWriter().getEmail());
-                        activitiesRepository.save(activities);
-                    })
-            );
+            List<Long> followerList = followRepository.findFollowerList(memberId);
+            String fromUserName = toMemberService.getMemberNameById(token,memberId);
+            String toUserName = toMemberService.getMemberNameById(token,post.get().getWriteMemberId());
+            toActivityService.addActivities(token,followerList,fromUserName,toUserName,"POST_LIKES");
 
             //게시글 주인 활동에 남기기
-            Member postOwner = post.get().getWriter();
-            Activities activities = new Activities(postOwner, ActivityType.POST_LIKES, email, postOwner.getEmail());
-            String notificaton = email + "님이 내 게시글을 좋아합니다.";
-            activities.changeNotification(notificaton);
-            activitiesRepository.save(activities);
+            toActivityService.addActivityToOwner(token,post.get().getWriteMemberId(),fromUserName,"POST_LIKES");
         }
 
         /**

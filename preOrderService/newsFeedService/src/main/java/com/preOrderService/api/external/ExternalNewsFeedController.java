@@ -106,9 +106,15 @@ public class ExternalNewsFeedController {
      * 게시글 좋아요
      */
     @PostMapping("/posts/like/{postId}")
-    public ResponseEntity<Void> postLike(@PathVariable("postId") Long postId) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        newsFeedService.postLike(email, postId);
+    public ResponseEntity<Void> postLike(@RequestHeader("Authorization") String token,
+                                         @PathVariable("postId") Long postId) {
+        if (jwtUtil.isExpired(token)) {
+            throw new RuntimeException("토큰이 유효하지 않습니다.");
+        }
+
+        Long memberId = jwtUtil.getUserId(token);
+
+        newsFeedService.postLike(token,memberId, postId);
         return ResponseEntity.ok().build();
     }
 
