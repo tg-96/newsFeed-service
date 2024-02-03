@@ -67,11 +67,9 @@ public class NewsFeedService {
     /**
      * 뉴스피드 조회
      */
-    public List<FeedsDto> getFeeds(String token) {
-        Map<String, Object> currentMember = toMemberService.getCurrentMember(token);
-        Number id = (Number) currentMember.get("id");
+    public List<FeedsDto> getFeeds(Long memberId) {
         // 피드 조회
-        List<Feeds> feeds = feedsRepository.findByOwner(id.longValue());
+        List<Feeds> feeds = feedsRepository.findByOwner(memberId);
 
         //feeds가 없으면 예외 처리
         if (feeds.isEmpty()) {
@@ -82,17 +80,14 @@ public class NewsFeedService {
         List<Posts> posts = feeds.stream().map(f -> f.getPost()).collect(Collectors.toList());
 
         return posts.stream()
-                .map(post -> {
-                    Map<String, Object> writeMember = toMemberService.getMemberById(token, post.getWriteMemberId());
-                    return new FeedsDto(
-                            post.getContent(),
-                            (String) writeMember.get("email"),
-                            (String) writeMember.get("name"),
-                            post.getImage(),
-                            post.getCreatedDate(),
-                            post.getModifiedDate());
-
-                }).collect(Collectors.toList());
+                .map(post ->
+                        new FeedsDto(
+                                post.getContent(),
+                                post.getWriteMemberId(),
+                                post.getImage(),
+                                post.getCreatedDate(),
+                                post.getModifiedDate())
+                ).collect(Collectors.toList());
     }
 
     /**

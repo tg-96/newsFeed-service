@@ -39,8 +39,15 @@ public class ExternalNewsFeedController {
      */
     @GetMapping
     public List<FeedsDto> getNewsFeeds(@RequestHeader("Authorization") String token) {
+        //토큰 유효성 검증
+        if(jwtUtil.isExpired(token)){
+            throw new RuntimeException("토큰이 유효하지 않습니다.");
+        }
+
+        Long memberId = jwtUtil.getUserId(token);
+
         //뉴스피드 조회
-        List<FeedsDto> newsFeeds = newsFeedService.getFeeds(token);
+        List<FeedsDto> newsFeeds = newsFeedService.getFeeds(memberId);
 
         return newsFeeds;
     }
