@@ -117,43 +117,38 @@ public class NewsFeedService {
             //내 팔로워들의 활동에 추가
             toActivityService.addActivities(token, followerIdList, fromMemberName, null, "POSTS");
         });
+    }
 
         /**
          * 댓글 작성
          */
         @Transactional
-        public Long writeComments (String token, Long postId, CommentsDto commentsDto){
-            // 멤버 정보 조회
-            Map<String, Object> currentMember = toMemberService.getCurrentMember(token);
-            Number memberId = (Number) currentMember.get("id");
-
+        public Long writeComments(String token, Long fromMemberId, Long postId, CommentsDto commentsDto){
+            //게시물 조회
             Optional<Posts> post = postsRepository.findById(postId);
             if (post.isEmpty()) {
                 throw new RuntimeException("게시글이 존재하지 않습니다.");
             }
 
             //댓글 추가
-            Comments comments = new Comments(memberId.longValue(), post.get(), commentsDto.getText());
+            Comments comments = new Comments(fromMemberId, post.get(), commentsDto.getText());
             Comments save = commentsRepository.save(comments);
 
-            // 팔로워 활동에 나의 댓글 활동 추가
-            List<Long> followerList = followRepository.findFollowerList(memberId.longValue());
-            String targetEmail = post.get().getWriter().getEmail();
+            // 팔로워 조회
+            List<Long> followerList = followRepository.findFollowerList(fromMemberId);
 
-            followerList.stream().forEach(id -> {
-                Optional<Member> follower = memberRepository.findById(id);
-                Activities activities = new Activities(follower.get(), ActivityType.COMMENTS, writerEmail, targetEmail);
-                activitiesRepository.save(activities);
-            });
+            //작성자 이름
+            String fromMemberName = toMemberService.getMemberNameById(token,fromMemberId);
+
+            //게시글 주인 이름
+            Long toMemberId = post.get().getWriteMemberId();
+            String toMemberName = toMemberService.getMemberNameById(token,toMemberId);
+
+            //팔로워들의 활동에 추가
+            toActivityService.addActivities(token,followerList,fromMemberName,toMemberName,"COMMENTS");
 
             //게시물 주인의 활동에 추가
-            Member postOwner = post.get().getWriter();
-            Activities activities = new Activities(postOwner, ActivityType.POSTS, writerEmail, null);
-
-            String notification = writer.get().getEmail() + "님이 내 게시물에 댓글을 달았습니다.";
-
-            activities.changeNotification(notification);
-            activitiesRepository.save(activities);
+            toActivityService.addActivityToOwner(token,toMemberId,fromMemberName,"COMMENTS");
             return save.getId();
         }
 
@@ -164,7 +159,7 @@ public class NewsFeedService {
             List<Comments> comments = commentsRepository.findByPostId(postId);
 
             return comments.stream().map(c ->
-                    new CommentsResponseDto(c.getId(), c.getWriteMemberId().getEmail(), c.getWriteMemberId().getName(), c.getText())
+                    new CommentsResponseDto(c.getId(), c.getWriteMemberId(), name, c.getText())
             ).collect(Collectors.toList());
         }
 

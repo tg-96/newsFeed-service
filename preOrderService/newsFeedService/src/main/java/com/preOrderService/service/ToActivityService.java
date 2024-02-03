@@ -22,7 +22,7 @@ public class ToActivityService {
      * 팔로워들의 activity에 활동 추가 요청
      * TODO: 팔로워 수가 많을 경우 API 요청이 너무 많음.
      */
-    public void addActivities(String token, List<Long> followerId, String fromUserName, String toUserName,String type) {
+    public void addActivities(String token, List<Long> followerId, String fromUserName, String toUserName, String type) {
 
         //body에 들어갈 내용 추가
         Map<String, Object> bodyMap = new HashMap<>();
@@ -46,5 +46,29 @@ public class ToActivityService {
                             .block();
                 }
         );
+    }
+
+    /**
+     * 누군가 댓글이나 좋아요를 남겼을때, 내 활동에 알림을 남겨줌.
+     */
+    public void addActivityToOwner(String token, Long memberId, String fromUserName, String type) {
+
+        //body에 들어갈 내용 추가
+        Map<String, Object> bodyMap = new HashMap<>();
+        bodyMap.put("memberId", memberId);
+        bodyMap.put("fromUserName", fromUserName);
+        bodyMap.put("type", type);
+
+        activityClient
+                .post()
+                .uri(uriBuilder ->
+                        uriBuilder
+                                .path("/activities/owner")
+                                .build())
+                .header("Authorization", token)
+                .bodyValue(bodyMap)
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block();
     }
 }

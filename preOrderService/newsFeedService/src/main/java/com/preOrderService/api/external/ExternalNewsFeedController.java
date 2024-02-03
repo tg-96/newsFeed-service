@@ -93,7 +93,12 @@ public class ExternalNewsFeedController {
      * 댓글 조회
      */
     @GetMapping("/comments/{postId}")
-    public List<CommentsResponseDto> findComments(@PathVariable("postId") Long postId) {
+    public List<CommentsResponseDto> findComments(@RequestHeader("Authorization") String token,
+                                                  @PathVariable("postId") Long postId) {
+        if (jwtUtil.isExpired(token)) {
+            throw new RuntimeException("토큰이 유효하지 않습니다.");
+        }
+
         return newsFeedService.findCommentsByPost(postId);
     }
 
