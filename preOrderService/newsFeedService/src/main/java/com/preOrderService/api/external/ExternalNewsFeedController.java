@@ -114,7 +114,7 @@ public class ExternalNewsFeedController {
 
         Long memberId = jwtUtil.getUserId(token);
 
-        newsFeedService.postLike(token,memberId, postId);
+        newsFeedService.postLike(token, memberId, postId);
         return ResponseEntity.ok().build();
     }
 
@@ -122,7 +122,12 @@ public class ExternalNewsFeedController {
      * 게시글별 좋아요 조회
      */
     @GetMapping("/posts/like/{postId}")
-    public List<PostLikesDto> findPostLikes(@PathVariable("postId") Long postId) {
+    public List<PostLikesDto> findPostLikes(@RequestHeader("Authorization") String token,
+                                            @PathVariable("postId") Long postId) {
+        if (jwtUtil.isExpired(token)) {
+            throw new RuntimeException("토큰이 유효하지 않습니다.");
+        }
+
         return newsFeedService.findPostLike(postId);
     }
 

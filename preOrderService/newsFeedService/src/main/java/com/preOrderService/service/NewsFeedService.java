@@ -194,7 +194,7 @@ public class NewsFeedService {
             List<PostLikes> postLikesList = postLikesRepository.findByPostId(postId);
 
             return postLikesList.stream()
-                    .map(pl -> new PostLikesDto(postId, pl.getLikeMemberId().getEmail()))
+                    .map(pl -> new PostLikesDto(postId, pl.getLikeMemberId()))
                     .collect(Collectors.toList());
         }
 
