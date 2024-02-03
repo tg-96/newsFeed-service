@@ -106,38 +106,33 @@ public class NewsFeedService {
      * 포스트 작성 -> 내 피드, 포스트에 추가,팔로워들의 피드에 포스트 추가
      */
     @Transactional
-    public void writePost(String writerEmail, PostsDto postsDto) {
-        Optional<Member> member = memberRepository.findByEmail(writerEmail);
+    public void writePost(String token, PostsDto postsDto) {
 
-        if (member.isEmpty()) {
-            throw new RuntimeException("멤버 정보가 없습니다.");
-        }
-
+        Map<String, Object> currentMember = toMemberService.getCurrentMember(token);
+        Number memberId = (Number) currentMember.get("id");
         //게시물 생성
-        Posts post = new Posts(postsDto.getContent(), postsDto.getImage(), member.get());
+        Posts post = new Posts(postsDto.getContent(), postsDto.getImage(), memberId.longValue());
         Posts saved_posts = postsRepository.save(post);
 
         //내피드에 추가
-        Feeds feed = new Feeds(saved_posts, member.get());
+        Feeds feed = new Feeds(saved_posts, memberId.longValue());
         feedsRepository.save(feed);
 
-        //내 팔로워들의 피드,활동에 추가
-        List<Long> followerIdList = followRepository.findFollowerList(member.get().getId());
+        //내 팔로워들의 피드에 추가
+        List<Long> followerIdList = followRepository.findFollowerList(memberId.longValue());
         followerIdList.stream().forEach(id -> {
-            Optional<Member> follower = memberRepository.findById(id);
+            Map<String, Object> follower = toMemberService.getMemberById(token, id);
+            Number followerId= (Number)follower.get("id");
 
-            if (follower.isEmpty()) {
-                throw new RuntimeException("follower 정보가 존재하지 않습니다.");
-            }
-
-            feedsRepository.save(new Feeds(saved_posts, follower.get()));
-
-            activitiesRepository.save(Activities.builder()
-                    .member(follower.get())
-                    .type(ActivityType.POSTS)
-                    .actorEmail(writerEmail)
-                    .build());
+            feedsRepository.save(new Feeds(saved_posts, followerId.longValue()));
         });
+
+        //현재 로그인한 멤버 이메일
+        String fromEmail = (String)currentMember.get("email");
+
+        //내 팔로워들의 활동에 추가
+        toActivityService.addActivities(token,followerIdList,fromEmail,null,"POSTS");
+
     }
 
     /**

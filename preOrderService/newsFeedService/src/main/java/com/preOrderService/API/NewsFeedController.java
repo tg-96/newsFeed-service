@@ -42,9 +42,8 @@ public class NewsFeedController {
      * 게시글 작성
      */
     @PostMapping("/posts")
-    public ResponseEntity<Void> writePost(@RequestBody PostsDto postsDto) {
-        String email = SecurityContextHolde69r.getContext().getAuthentication().getName();
-        newsFeedService.writePost(email, postsDto);
+    public ResponseEntity<Void> writePost(@RequestBody PostsDto postsDto,@RequestHeader("Authorization")String token) {
+        newsFeedService.writePost(token, postsDto);
 
         return ResponseEntity.ok().build();
     }
