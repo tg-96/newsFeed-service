@@ -17,19 +17,20 @@ import java.util.List;
 public class ExternalNewsFeedController {
     private final NewsFeedService newsFeedService;
     private final JWTUtil jwtUtil;
+
     /**
      * 팔로우
      */
     @PostMapping("/follow")
     public ResponseEntity<Void> follow(@RequestBody RequestMemberDto request, @RequestHeader("Authorization") String token) {
         //유효기간 만료확인
-        if(jwtUtil.isExpired(token)){
+        if (jwtUtil.isExpired(token)) {
             throw new RuntimeException("토큰이 유효하지 않습니다.");
         }
         Long fromMemberId = jwtUtil.getUserId(token);
         Long toMemberId = request.getMemberId();
 
-        newsFeedService.changeFollow(token,fromMemberId,toMemberId);
+        newsFeedService.changeFollow(token, fromMemberId, toMemberId);
 
         return ResponseEntity.ok().build();
     }
@@ -40,7 +41,7 @@ public class ExternalNewsFeedController {
     @GetMapping
     public List<FeedsDto> getNewsFeeds(@RequestHeader("Authorization") String token) {
         //토큰 유효성 검증
-        if(jwtUtil.isExpired(token)){
+        if (jwtUtil.isExpired(token)) {
             throw new RuntimeException("토큰이 유효하지 않습니다.");
         }
 
@@ -58,7 +59,14 @@ public class ExternalNewsFeedController {
      */
     @PostMapping("/posts")
     public ResponseEntity<Void> writePost(@RequestBody PostsDto postsDto, @RequestHeader("Authorization") String token) {
-        newsFeedService.writePost(token, postsDto);
+        //토큰 유효성 검증
+        if (jwtUtil.isExpired(token)) {
+            throw new RuntimeException("토큰이 유효하지 않습니다.");
+        }
+
+        Long memberId = jwtUtil.getUserId(token);
+
+        newsFeedService.writePost(token, memberId, postsDto);
 
         return ResponseEntity.ok().build();
     }
@@ -70,7 +78,13 @@ public class ExternalNewsFeedController {
     public ResponseEntity<Void> writeComments(@RequestHeader("Authorization") String token,
                                               @PathVariable("postId") Long postId,
                                               @RequestBody CommentsDto commentsDto) {
-        newsFeedService.writeComments(token, postId, commentsDto);
+        if (jwtUtil.isExpired(token)) {
+            throw new RuntimeException("토큰이 유효하지 않습니다.");
+        }
+
+        Long memberId = jwtUtil.getUserId(token);
+
+        newsFeedService.writeComments(token, memberId, postId, commentsDto);
 
         return ResponseEntity.ok().build();
     }

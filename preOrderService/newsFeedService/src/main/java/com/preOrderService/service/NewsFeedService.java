@@ -94,179 +94,174 @@ public class NewsFeedService {
      * 포스트 작성 -> 내 피드, 포스트에 추가,팔로워들의 피드에 포스트 추가
      */
     @Transactional
-    public void writePost(String token, PostsDto postsDto) {
-
-        Map<String, Object> currentMember = toMemberService.getCurrentMember(token);
-        Number memberId = (Number) currentMember.get("id");
+    public void writePost(String token, Long memberId, PostsDto postsDto) {
         //게시물 생성
-        Posts post = new Posts(postsDto.getContent(), postsDto.getImage(), memberId.longValue());
+        Posts post = new Posts(postsDto.getContent(), postsDto.getImage(), memberId);
         Posts saved_posts = postsRepository.save(post);
 
         //내피드에 추가
-        Feeds feed = new Feeds(saved_posts, memberId.longValue());
+        Feeds feed = new Feeds(saved_posts, memberId);
         feedsRepository.save(feed);
 
+        /**
+         * bulk 쿼리연산으로 수정
+         */
         //내 팔로워들의 피드에 추가
-        List<Long> followerIdList = followRepository.findFollowerList(memberId.longValue());
+        List<Long> followerIdList = followRepository.findFollowerList(memberId);
         followerIdList.stream().forEach(id -> {
-            Map<String, Object> follower = toMemberService.getMemberById(token, id);
-            Number followerId = (Number) follower.get("id");
+            feedsRepository.save(new Feeds(saved_posts, id));
 
-            feedsRepository.save(new Feeds(saved_posts, followerId.longValue()));
+            //현재 로그인한 멤버 이메일
+            String fromMemberName = toMemberService.getMemberNameById(token, memberId);
+
+            //내 팔로워들의 활동에 추가
+            toActivityService.addActivities(token, followerIdList, fromMemberName, null, "POSTS");
         });
 
-        //현재 로그인한 멤버 이메일
-        String fromEmail = (String) currentMember.get("email");
+        /**
+         * 댓글 작성
+         */
+        @Transactional
+        public Long writeComments (String token, Long postId, CommentsDto commentsDto){
+            // 멤버 정보 조회
+            Map<String, Object> currentMember = toMemberService.getCurrentMember(token);
+            Number memberId = (Number) currentMember.get("id");
 
-        //내 팔로워들의 활동에 추가
-        toActivityService.addActivities(token, followerIdList, fromEmail, null, "POSTS");
+            Optional<Posts> post = postsRepository.findById(postId);
+            if (post.isEmpty()) {
+                throw new RuntimeException("게시글이 존재하지 않습니다.");
+            }
 
-    }
+            //댓글 추가
+            Comments comments = new Comments(memberId.longValue(), post.get(), commentsDto.getText());
+            Comments save = commentsRepository.save(comments);
 
-    /**
-     * 댓글 작성
-     */
-    @Transactional
-    public Long writeComments(String token, Long postId, CommentsDto commentsDto) {
-        // 멤버 정보 조회
-        Map<String, Object> currentMember = toMemberService.getCurrentMember(token);
-        Number memberId = (Number) currentMember.get("id");
+            // 팔로워 활동에 나의 댓글 활동 추가
+            List<Long> followerList = followRepository.findFollowerList(memberId.longValue());
+            String targetEmail = post.get().getWriter().getEmail();
 
-        Optional<Posts> post = postsRepository.findById(postId);
-        if (post.isEmpty()) {
-            throw new RuntimeException("게시글이 존재하지 않습니다.");
-        }
+            followerList.stream().forEach(id -> {
+                Optional<Member> follower = memberRepository.findById(id);
+                Activities activities = new Activities(follower.get(), ActivityType.COMMENTS, writerEmail, targetEmail);
+                activitiesRepository.save(activities);
+            });
 
-        //댓글 추가
-        Comments comments = new Comments(memberId.longValue(), post.get(), commentsDto.getText());
-        Comments save = commentsRepository.save(comments);
+            //게시물 주인의 활동에 추가
+            Member postOwner = post.get().getWriter();
+            Activities activities = new Activities(postOwner, ActivityType.POSTS, writerEmail, null);
 
-        // 팔로워 활동에 나의 댓글 활동 추가
-        List<Long> followerList = followRepository.findFollowerList(memberId.longValue());
-        String targetEmail = post.get().getWriter().getEmail();
+            String notification = writer.get().getEmail() + "님이 내 게시물에 댓글을 달았습니다.";
 
-        followerList.stream().forEach(id -> {
-            Optional<Member> follower = memberRepository.findById(id);
-            Activities activities = new Activities(follower.get(), ActivityType.COMMENTS, writerEmail, targetEmail);
+            activities.changeNotification(notification);
             activitiesRepository.save(activities);
-        });
-
-        //게시물 주인의 활동에 추가
-        Member postOwner = post.get().getWriter();
-        Activities activities = new Activities(postOwner, ActivityType.POSTS, writerEmail, null);
-
-        String notification = writer.get().getEmail() + "님이 내 게시물에 댓글을 달았습니다.";
-
-        activities.changeNotification(notification);
-        activitiesRepository.save(activities);
-        return save.getId();
-    }
-
-    /**
-     * 댓글 조회
-     */
-    public List<CommentsResponseDto> findCommentsByPost(Long postId) {
-        List<Comments> comments = commentsRepository.findByPostId(postId);
-
-        return comments.stream().map(c ->
-                new CommentsResponseDto(c.getId(), c.getWriteMemberId().getEmail(), c.getWriteMemberId().getName(), c.getText())
-        ).collect(Collectors.toList());
-    }
-
-    /**
-     * 게시글 좋아요
-     */
-    @Transactional
-    public void postLike(String email, Long postId) {
-        Optional<Member> member = memberRepository.findByEmail(email);
-        if (member.isEmpty()) {
-            throw new RuntimeException("좋아요한 멤버가 존재하지 않습니다.");
+            return save.getId();
         }
 
-        Optional<Posts> post = postsRepository.findById(postId);
-        if (post.isEmpty()) {
-            throw new RuntimeException("좋아요한 게시글이 존재하지 않습니다.");
-        }
-        //좋아요 저장
-        PostLikes postLikes = new PostLikes(post.get(), member.get());
-        postLikesRepository.save(postLikes);
+        /**
+         * 댓글 조회
+         */
+        public List<CommentsResponseDto> findCommentsByPost (Long postId){
+            List<Comments> comments = commentsRepository.findByPostId(postId);
 
-        //좋아요 활동 팔로워에 남기기
-        List<Long> followerList = followRepository.findFollowerList(member.get().getId());
-        followerList.stream().forEach(id ->
-                memberRepository.findById(id).ifPresent(m -> {
-                    Activities activities = new Activities(m, ActivityType.POST_LIKES, email, post.get().getWriter().getEmail());
-                    activitiesRepository.save(activities);
-                })
-        );
-
-        //게시글 주인 활동에 남기기
-        Member postOwner = post.get().getWriter();
-        Activities activities = new Activities(postOwner, ActivityType.POST_LIKES, email, postOwner.getEmail());
-        String notificaton = email + "님이 내 게시글을 좋아합니다.";
-        activities.changeNotification(notificaton);
-        activitiesRepository.save(activities);
-    }
-
-    /**
-     * 게시글 좋아요 조회
-     */
-    public List<PostLikesDto> findPostLike(Long postId) {
-        List<PostLikes> postLikesList = postLikesRepository.findByPostId(postId);
-
-        return postLikesList.stream()
-                .map(pl -> new PostLikesDto(postId, pl.getLikeMemberId().getEmail()))
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * 댓글 좋아요
-     */
-    @Transactional
-    public Long commentLike(Long commentsId, String email) {
-        Optional<Comments> comment = commentsRepository.findById(commentsId);
-        if (comment.isEmpty()) {
-            throw new RuntimeException("좋아요한 댓글이 존재하지 않습니다.");
-        }
-        Optional<Member> member = memberRepository.findByEmail(email);
-        if (member.isEmpty()) {
-            throw new RuntimeException("좋아요한 회원이 존재하지 않습니다.");
+            return comments.stream().map(c ->
+                    new CommentsResponseDto(c.getId(), c.getWriteMemberId().getEmail(), c.getWriteMemberId().getName(), c.getText())
+            ).collect(Collectors.toList());
         }
 
-        //댓글 좋아요 저장
-        CommentLikes commentLikes = new CommentLikes(comment.get(), member.get());
-        CommentLikes save = commentLikesRepository.save(commentLikes);
+        /**
+         * 게시글 좋아요
+         */
+        @Transactional
+        public void postLike (String email, Long postId){
+            Optional<Member> member = memberRepository.findByEmail(email);
+            if (member.isEmpty()) {
+                throw new RuntimeException("좋아요한 멤버가 존재하지 않습니다.");
+            }
 
-        //댓글 좋아요, 팔로워 활동에 남기기
-        List<Long> followerList = followRepository.findFollowerList(member.get().getId());
-        followerList.stream().forEach(id ->
-                memberRepository.findById(id).ifPresent(m -> {
-                    Activities activities = new Activities(m, ActivityType.COMMENT_LIKE, email, comment.get().getWriteMemberId().getEmail());
-                    activitiesRepository.save(activities);
-                })
-        );
+            Optional<Posts> post = postsRepository.findById(postId);
+            if (post.isEmpty()) {
+                throw new RuntimeException("좋아요한 게시글이 존재하지 않습니다.");
+            }
+            //좋아요 저장
+            PostLikes postLikes = new PostLikes(post.get(), member.get());
+            postLikesRepository.save(postLikes);
 
-        //댓글 주인의 활동에 남기기
-        Activities activities = new Activities(comment.get().getWriteMemberId(), ActivityType.COMMENT_LIKE, email, comment.get().getWriteMemberId().getEmail());
-        String notification = email + "님이 내 댓글을 좋아합니다.";
-        activitiesRepository.save(activities);
+            //좋아요 활동 팔로워에 남기기
+            List<Long> followerList = followRepository.findFollowerList(member.get().getId());
+            followerList.stream().forEach(id ->
+                    memberRepository.findById(id).ifPresent(m -> {
+                        Activities activities = new Activities(m, ActivityType.POST_LIKES, email, post.get().getWriter().getEmail());
+                        activitiesRepository.save(activities);
+                    })
+            );
 
-        return save.getId();
+            //게시글 주인 활동에 남기기
+            Member postOwner = post.get().getWriter();
+            Activities activities = new Activities(postOwner, ActivityType.POST_LIKES, email, postOwner.getEmail());
+            String notificaton = email + "님이 내 게시글을 좋아합니다.";
+            activities.changeNotification(notificaton);
+            activitiesRepository.save(activities);
+        }
+
+        /**
+         * 게시글 좋아요 조회
+         */
+        public List<PostLikesDto> findPostLike (Long postId){
+            List<PostLikes> postLikesList = postLikesRepository.findByPostId(postId);
+
+            return postLikesList.stream()
+                    .map(pl -> new PostLikesDto(postId, pl.getLikeMemberId().getEmail()))
+                    .collect(Collectors.toList());
+        }
+
+        /**
+         * 댓글 좋아요
+         */
+        @Transactional
+        public Long commentLike (Long commentsId, String email){
+            Optional<Comments> comment = commentsRepository.findById(commentsId);
+            if (comment.isEmpty()) {
+                throw new RuntimeException("좋아요한 댓글이 존재하지 않습니다.");
+            }
+            Optional<Member> member = memberRepository.findByEmail(email);
+            if (member.isEmpty()) {
+                throw new RuntimeException("좋아요한 회원이 존재하지 않습니다.");
+            }
+
+            //댓글 좋아요 저장
+            CommentLikes commentLikes = new CommentLikes(comment.get(), member.get());
+            CommentLikes save = commentLikesRepository.save(commentLikes);
+
+            //댓글 좋아요, 팔로워 활동에 남기기
+            List<Long> followerList = followRepository.findFollowerList(member.get().getId());
+            followerList.stream().forEach(id ->
+                    memberRepository.findById(id).ifPresent(m -> {
+                        Activities activities = new Activities(m, ActivityType.COMMENT_LIKE, email, comment.get().getWriteMemberId().getEmail());
+                        activitiesRepository.save(activities);
+                    })
+            );
+
+            //댓글 주인의 활동에 남기기
+            Activities activities = new Activities(comment.get().getWriteMemberId(), ActivityType.COMMENT_LIKE, email, comment.get().getWriteMemberId().getEmail());
+            String notification = email + "님이 내 댓글을 좋아합니다.";
+            activitiesRepository.save(activities);
+
+            return save.getId();
+        }
+
+        /**
+         * 댓글 좋아요 조회
+         */
+        public List<CommentLikesDto> findCommentLike (Long commentId){
+            List<CommentLikes> commentLikesList = commentLikesRepository.findCommentLikesByCommentsId(commentId);
+            Optional<Comments> comments = commentsRepository.findById(commentId);
+
+            int count = commentLikesList.size();
+
+            return commentLikesList.stream()
+                    .map(cl -> new CommentLikesDto(commentId, comments.get().getWriteMemberId().getEmail(), count))
+                    .collect(Collectors.toList());
+        }
+
+
     }
-
-    /**
-     * 댓글 좋아요 조회
-     */
-    public List<CommentLikesDto> findCommentLike(Long commentId) {
-        List<CommentLikes> commentLikesList = commentLikesRepository.findCommentLikesByCommentsId(commentId);
-        Optional<Comments> comments = commentsRepository.findById(commentId);
-
-        int count = commentLikesList.size();
-
-        return commentLikesList.stream()
-                .map(cl -> new CommentLikesDto(commentId, comments.get().getWriteMemberId().getEmail(), count))
-                .collect(Collectors.toList());
-    }
-
-
-}
