@@ -2,16 +2,13 @@ package com.preOrderService.service;
 
 import com.preOrderService.dto.*;
 import com.preOrderService.entity.*;
-import com.preOrderService.entity.Member;
-import com.preOrderService.repository.*;
-import com.preOrderService.repository.MemberRepository;
 import com.preOrderService.newsFeed.dto.*;
 import com.preOrderService.newsFeed.entity.*;
 import com.preOrderService.newsFeed.repository.*;
+import com.preOrderService.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 import java.util.Map;
@@ -30,24 +27,25 @@ public class NewsFeedService {
     private final CommentLikesRepository commentLikesRepository;
     private final ToMemberService toMemberService;
     private final ToActivityService toActivityService;
+
     /**
      * 팔로우 & 언팔로우
      * 팔로우 중이 아니면 팔로우하고,
      * 팔로우 중이면 언팔로우 한다.
      */
     @Transactional
-    public String changeFollow(String toEmail,String token) {
+    public String changeFollow(String toEmail, String token) {
         //사용자
         Map<String, Object> fromMember = toMemberService.getCurrentMember(token);
 
         //사용자가 팔로우할 대상
         Map<String, Object> toMember = toMemberService.getMemberByEmail(token, toEmail);
-        Number fromMemberId = (Number)fromMember.get("id");
-        Number toMemberId = (Number)toMember.get("id");
+        Number fromMemberId = (Number) fromMember.get("id");
+        Number toMemberId = (Number) toMember.get("id");
 
         //follow 관계 불러옴
         Optional<Follows> relation = followRepository.isFollow(fromMemberId.longValue(), toMemberId.longValue());
-        String fromEmail = (String)fromMember.get("email");
+        String fromEmail = (String) fromMember.get("email");
 
         //팔로우 상대면 팔로우 취소
         if (relation.isPresent()) {
@@ -76,16 +74,11 @@ public class NewsFeedService {
     /**
      * 뉴스피드 조회
      */
-    public List<FeedsDto> getFeeds(String email) {
-        Optional<Member> member = memberRepository.findByEmail(email);
-
-        // member 정보가 없으면 예외 처리
-        if (member.isEmpty()) {
-            throw new RuntimeException("피드를 조회할 멤버 정보가 없습니다.");
-        }
-
+    public List<FeedsDto> getFeeds(String token) {
+        Map<String, Object> currentMember = toMemberService.getCurrentMember(token);
+        Number id = (Number) currentMember.get("id");
         // 피드 조회
-        List<Feeds> feeds = feedsRepository.findByOwner(member.get().getId());
+        List<Feeds> feeds = feedsRepository.findByOwner(id.longValue());
 
         //feeds가 없으면 예외 처리
         if (feeds.isEmpty()) {
@@ -96,14 +89,17 @@ public class NewsFeedService {
         List<Posts> posts = feeds.stream().map(f -> f.getPost()).collect(Collectors.toList());
 
         return posts.stream()
-                .map(post -> new FeedsDto(
-                        post.getContent(),
-                        post.getWriter().getEmail(),
-                        post.getWriter().getName(),
-                        post.getImage(),
-                        post.getCreatedDate(),
-                        post.getModifiedDate())
-                ).collect(Collectors.toList());
+                .map(post -> {
+                    Map<String, Object> writeMember = toMemberService.getMemberById(token, post.getWriteMemberId());
+                    return new FeedsDto(
+                            post.getContent(),
+                            (String) writeMember.get("email"),
+                            (String) writeMember.get("name"),
+                            post.getImage(),
+                            post.getCreatedDate(),
+                            post.getModifiedDate());
+
+                }).collect(Collectors.toList());
     }
 
     /**
@@ -191,7 +187,7 @@ public class NewsFeedService {
         List<Comments> comments = commentsRepository.findByPostId(postId);
 
         return comments.stream().map(c ->
-                new CommentsResponseDto(c.getId(),c.getWriteMemberId().getEmail(), c.getWriteMemberId().getName(), c.getText())
+                new CommentsResponseDto(c.getId(), c.getWriteMemberId().getEmail(), c.getWriteMemberId().getName(), c.getText())
         ).collect(Collectors.toList());
     }
 
@@ -224,8 +220,8 @@ public class NewsFeedService {
 
         //게시글 주인 활동에 남기기
         Member postOwner = post.get().getWriter();
-        Activities activities = new Activities(postOwner,ActivityType.POST_LIKES,email,postOwner.getEmail());
-        String notificaton = email+"님이 내 게시글을 좋아합니다.";
+        Activities activities = new Activities(postOwner, ActivityType.POST_LIKES, email, postOwner.getEmail());
+        String notificaton = email + "님이 내 게시글을 좋아합니다.";
         activities.changeNotification(notificaton);
         activitiesRepository.save(activities);
     }
@@ -233,7 +229,7 @@ public class NewsFeedService {
     /**
      * 게시글 좋아요 조회
      */
-    public List<PostLikesDto> findPostLike(Long postId){
+    public List<PostLikesDto> findPostLike(Long postId) {
         List<PostLikes> postLikesList = postLikesRepository.findByPostId(postId);
 
         return postLikesList.stream()
@@ -245,32 +241,32 @@ public class NewsFeedService {
      * 댓글 좋아요
      */
     @Transactional
-    public Long commentLike(Long commentsId,String email){
+    public Long commentLike(Long commentsId, String email) {
         Optional<Comments> comment = commentsRepository.findById(commentsId);
-        if(comment.isEmpty()){
+        if (comment.isEmpty()) {
             throw new RuntimeException("좋아요한 댓글이 존재하지 않습니다.");
         }
         Optional<Member> member = memberRepository.findByEmail(email);
-        if(member.isEmpty()){
+        if (member.isEmpty()) {
             throw new RuntimeException("좋아요한 회원이 존재하지 않습니다.");
         }
 
         //댓글 좋아요 저장
-        CommentLikes commentLikes = new CommentLikes(comment.get(),member.get());
+        CommentLikes commentLikes = new CommentLikes(comment.get(), member.get());
         CommentLikes save = commentLikesRepository.save(commentLikes);
 
         //댓글 좋아요, 팔로워 활동에 남기기
         List<Long> followerList = followRepository.findFollowerList(member.get().getId());
         followerList.stream().forEach(id ->
                 memberRepository.findById(id).ifPresent(m -> {
-                    Activities activities = new Activities(m, ActivityType.COMMENT_LIKE, email,comment.get().getWriteMemberId().getEmail() );
+                    Activities activities = new Activities(m, ActivityType.COMMENT_LIKE, email, comment.get().getWriteMemberId().getEmail());
                     activitiesRepository.save(activities);
                 })
         );
 
         //댓글 주인의 활동에 남기기
-        Activities activities = new Activities(comment.get().getWriteMemberId(), ActivityType.COMMENT_LIKE,email,comment.get().getWriteMemberId().getEmail());
-        String notification = email+"님이 내 댓글을 좋아합니다.";
+        Activities activities = new Activities(comment.get().getWriteMemberId(), ActivityType.COMMENT_LIKE, email, comment.get().getWriteMemberId().getEmail());
+        String notification = email + "님이 내 댓글을 좋아합니다.";
         activitiesRepository.save(activities);
 
         return save.getId();
@@ -279,17 +275,16 @@ public class NewsFeedService {
     /**
      * 댓글 좋아요 조회
      */
-    public List<CommentLikesDto> findCommentLike(Long commentId){
+    public List<CommentLikesDto> findCommentLike(Long commentId) {
         List<CommentLikes> commentLikesList = commentLikesRepository.findCommentLikesByCommentsId(commentId);
         Optional<Comments> comments = commentsRepository.findById(commentId);
 
         int count = commentLikesList.size();
 
         return commentLikesList.stream()
-                .map(cl -> new CommentLikesDto(commentId,comments.get().getWriteMemberId().getEmail(),count))
+                .map(cl -> new CommentLikesDto(commentId, comments.get().getWriteMemberId().getEmail(), count))
                 .collect(Collectors.toList());
     }
-
 
 
 }

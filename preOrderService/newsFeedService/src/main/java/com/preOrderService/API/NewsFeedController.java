@@ -10,7 +10,7 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/newsFeed")
+@RequestMapping("/api/newsFeed")
 @RequiredArgsConstructor
 public class NewsFeedController {
     private final NewsFeedService newsFeedService;
@@ -19,8 +19,8 @@ public class NewsFeedController {
      * 팔로우
      */
     @PostMapping("/follow/{email}")
-    public ResponseEntity<Void> follow(@PathVariable("email") String toEmail,@RequestHeader("Authorization")String auth) {
-        newsFeedService.changeFollow(toEmail,auth);
+    public ResponseEntity<Void> follow(@PathVariable("email") String toEmail,@RequestHeader("Authorization")String token) {
+        newsFeedService.changeFollow(toEmail,token);
 
         return ResponseEntity.ok().build();
     }
@@ -29,11 +29,9 @@ public class NewsFeedController {
      * 피드 조회
      */
     @GetMapping
-    public List<FeedsDto> getNewsFeeds() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-
+    public List<FeedsDto> getNewsFeeds(@RequestHeader("Authorization")String token) {
         //뉴스피드 조회
-        List<FeedsDto> newsFeeds = newsFeedService.getFeeds(email);
+        List<FeedsDto> newsFeeds = newsFeedService.getFeeds(token);
 
         return newsFeeds;
     }
@@ -45,7 +43,7 @@ public class NewsFeedController {
      */
     @PostMapping("/posts")
     public ResponseEntity<Void> writePost(@RequestBody PostsDto postsDto) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        String email = SecurityContextHolde69r.getContext().getAuthentication().getName();
         newsFeedService.writePost(email, postsDto);
 
         return ResponseEntity.ok().build();

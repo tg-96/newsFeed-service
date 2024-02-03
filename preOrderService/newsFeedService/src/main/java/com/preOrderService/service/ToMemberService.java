@@ -50,9 +50,23 @@ public class ToMemberService {
                 .bodyToMono(Map.class)
                 .block();
     }
-    /**
-     * 멤버 정보
-     */
 
+    /**
+     * 멤버id로 정보 조회
+     */
+    public Map<String, Object> getMemberById(String token, Long memberId) {
+        //현재 로그인한 사용자
+        return memberClient
+                .get()
+                .uri(uriBuilder ->
+                        uriBuilder
+                                .path("/member")
+                                .queryParam("memberId", memberId)
+                                .build())
+                .header("Authorization", token)
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block();
+    }
 
 }
