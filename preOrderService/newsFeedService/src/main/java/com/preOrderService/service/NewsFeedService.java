@@ -159,7 +159,7 @@ public class NewsFeedService {
             List<Comments> comments = commentsRepository.findByPostId(postId);
 
             return comments.stream().map(c ->
-                    new CommentsResponseDto(c.getId(), c.getWriteMemberId(), name, c.getText())
+                    new CommentsResponseDto(c.getId(), c.getWriteMemberId(), c.getText())
             ).collect(Collectors.toList());
         }
 
