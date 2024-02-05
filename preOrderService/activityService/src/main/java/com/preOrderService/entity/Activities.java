@@ -4,10 +4,12 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Getter
 @NoArgsConstructor
+@ToString
 public class Activities extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,7 +34,7 @@ public class Activities extends BaseTimeEntity {
             case COMMENTS -> notification = fromUserName+"님이 "+toUserName+"님의 글에 댓글을 작성했습니다.";
             case COMMENT_LIKE -> notification = fromUserName+"님이 "+toUserName+"님의 댓글을 좋아합니다.";
             case POSTS -> notification = fromUserName+"님이 게시물을 작성 했습니다.";
-            case POST_LIKE -> notification = fromUserName+"님이 "+toUserName+"님의 글을 좋아합니다.";
+            case POST_LIKES -> notification = fromUserName+"님이 "+toUserName+"님의 글을 좋아합니다.";
         }
     }
     // 내 포스트에 댓글을 작성했을 경우 notificaion 변경

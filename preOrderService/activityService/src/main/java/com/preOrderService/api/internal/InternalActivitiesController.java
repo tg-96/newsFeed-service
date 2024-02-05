@@ -24,6 +24,7 @@ public class InternalActivitiesController {
     @PostMapping("/activities")
     public ResponseEntity<Void> addActivities(@RequestHeader("Authorization")String token,
                                               @RequestBody RequestActivitiesDto request) {
+        System.out.println("(팔로워들)token = " + token + ", request = " + request.toString());
         String parse_token = jwtUtil.parser(token);
         Long userId = jwtUtil.getUserId(parse_token);
         activityService.addFollowerActivities(request,userId);
@@ -37,6 +38,7 @@ public class InternalActivitiesController {
      */
     @PostMapping("/activities/owner")
     public ResponseEntity<Void> addActivitiesToOwner( @RequestBody RequestActivitiesDto request) {
+        System.out.println("(나)request = " + request.toString());
         activityService.addMyActivities(request);
         return ResponseEntity.ok().build();
     }

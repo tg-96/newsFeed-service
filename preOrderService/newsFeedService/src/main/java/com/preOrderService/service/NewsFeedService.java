@@ -173,6 +173,7 @@ public class NewsFeedService {
 
             //게시글 주인 활동에 남기기
             toActivityService.addActivityToOwner(token,post.get().getWriteMemberId(),fromMemberId,"POST_LIKES");
+
         }
 
         /**

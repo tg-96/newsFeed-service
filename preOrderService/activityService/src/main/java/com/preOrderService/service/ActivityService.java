@@ -30,7 +30,7 @@ public class ActivityService {
      * 팔로워들의 활동에 추가
      */
     public void addFollowerActivities(RequestActivitiesDto request,Long userId){
-
+        System.out.println("request = " + request + ", userId = " + userId);
         //활동 타입 결정
         defineActivityType(request);
 
@@ -62,6 +62,8 @@ public class ActivityService {
                 request.getFromUserName(),
                 null
         );
+        System.out.println("activity = " + activity.toString());
+
 
         String notification ="";
         //활동에 따른 알림
@@ -70,7 +72,7 @@ public class ActivityService {
             case COMMENTS -> notification =  request.getFromUserName()+"님이 내 게시물에 댓글을 작성했습니다.";
             case COMMENT_LIKE -> notification =  request.getFromUserName()+"님이 내 댓글을 좋아합니다.";
             case POSTS -> throw new RuntimeException("포스트 작성은 내 활동에 추가할 수 없습니다.");
-            case POST_LIKE -> notification =  request.getFromUserName()+"님이 내 게시물을 좋아합니다.";
+            case POST_LIKES -> notification =  request.getFromUserName()+"님이 내 게시물을 좋아합니다.";
         }
 
         activity.changeNotification(notification);
@@ -93,7 +95,7 @@ public class ActivityService {
                 activityType = ActivityType.POSTS;
                 break;
             case "POST_LIKES":
-                activityType = ActivityType.POST_LIKE;
+                activityType = ActivityType.POST_LIKES;
                 break;
             default:
                 throw new RuntimeException("활동 타입이 올바르지 않습니다.");

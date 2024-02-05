@@ -64,7 +64,9 @@ public class ExternalNewsFeedController {
      * 게시글 작성
      */
     @PostMapping("/posts")
-    public ResponseEntity<Void> writePost(@RequestPart(value = "postsDto") PostsDto postsDto, @RequestPart(value = "file") MultipartFile multipartFile, @RequestHeader("Authorization") String token) {
+    public ResponseEntity<Void> writePost(@RequestPart(value = "postsDto") PostsDto postsDto,
+                                          @RequestPart(value = "file") MultipartFile multipartFile,
+                                          @RequestHeader("Authorization") String token) {
         String parse_token = jwtUtil.parser(token);
 
         //토큰 유효성 검증
@@ -80,7 +82,7 @@ public class ExternalNewsFeedController {
             image = awsS3Service.uploadFile(multipartFile);
         }
 
-        newsFeedService.writePost(token, memberId, postsDto,image);
+        newsFeedService.writePost(token, memberId, postsDto, image);
 
         return ResponseEntity.ok().build();
     }
