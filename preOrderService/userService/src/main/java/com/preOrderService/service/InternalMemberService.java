@@ -1,4 +1,4 @@
-package com.preOrderService.service.InternalService;
+package com.preOrderService.service;
 
 import com.preOrderService.dto.MemberResponseDto;
 import com.preOrderService.config.jwt.JWTUtil;

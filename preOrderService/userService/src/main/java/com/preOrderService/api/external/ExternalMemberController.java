@@ -4,11 +4,10 @@ import com.preOrderService.config.jwt.JWTUtil;
 import com.preOrderService.dto.JoinDto;
 import com.preOrderService.dto.MemberDto;
 import com.preOrderService.dto.PwdUpdateDto;
-import com.preOrderService.service.ExternalService.AwsS3Service;
-import com.preOrderService.service.ExternalService.MemberService;
+import com.preOrderService.service.AwsS3Service;
+import com.preOrderService.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 

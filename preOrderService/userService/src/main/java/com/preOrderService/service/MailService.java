@@ -1,4 +1,4 @@
-package com.preOrderService.service.ExternalService;
+package com.preOrderService.service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;

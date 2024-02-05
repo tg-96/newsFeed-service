@@ -11,5 +11,4 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PostsDto {
     private String content;
-    private String image;
 }

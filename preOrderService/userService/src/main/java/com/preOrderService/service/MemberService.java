@@ -1,4 +1,4 @@
-package com.preOrderService.service.ExternalService;
+package com.preOrderService.service;
 
 import com.preOrderService.entity.Member;
 import com.preOrderService.dto.JoinDto;

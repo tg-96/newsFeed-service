@@ -2,8 +2,8 @@ package com.preOrderService.api.internal;
 
 import com.preOrderService.dto.MemberResponseDto;
 import com.preOrderService.dto.MemberResponseNameDto;
-import com.preOrderService.service.ExternalService.MemberService;
-import com.preOrderService.service.InternalService.InternalMemberService;
+import com.preOrderService.service.MemberService;
+import com.preOrderService.service.InternalMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,4 +33,5 @@ public class InternalMemberController {
         MemberResponseNameDto response = new MemberResponseNameDto(name);
         return response;
     }
+
 }

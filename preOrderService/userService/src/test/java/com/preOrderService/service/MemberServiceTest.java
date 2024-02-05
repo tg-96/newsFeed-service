@@ -3,7 +3,6 @@ package com.preOrderService.service;
 import com.preOrderService.dto.JoinDto;
 import com.preOrderService.entity.Member;
 import com.preOrderService.repository.MemberRepository;
-import com.preOrderService.service.ExternalService.MemberService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

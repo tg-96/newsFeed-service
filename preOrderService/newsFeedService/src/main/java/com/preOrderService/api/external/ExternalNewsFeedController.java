@@ -3,10 +3,12 @@ package com.preOrderService.api.external;
 import com.preOrderService.config.JWTUtil;
 import com.preOrderService.dto.*;
 import com.preOrderService.dto.request.RequestMemberDto;
+import com.preOrderService.service.AwsS3Service;
 import com.preOrderService.service.NewsFeedService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -16,6 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ExternalNewsFeedController {
     private final NewsFeedService newsFeedService;
+    private final AwsS3Service awsS3Service;
     private final JWTUtil jwtUtil;
 
     /**
@@ -61,7 +64,7 @@ public class ExternalNewsFeedController {
      * 게시글 작성
      */
     @PostMapping("/posts")
-    public ResponseEntity<Void> writePost(@RequestBody PostsDto postsDto, @RequestHeader("Authorization") String token) {
+    public ResponseEntity<Void> writePost(@RequestPart(value = "postsDto") PostsDto postsDto, @RequestPart(value = "file") MultipartFile multipartFile, @RequestHeader("Authorization") String token) {
         String parse_token = jwtUtil.parser(token);
 
         //토큰 유효성 검증
@@ -71,7 +74,13 @@ public class ExternalNewsFeedController {
 
         Long memberId = jwtUtil.getUserId(parse_token);
 
-        newsFeedService.writePost(token, memberId, postsDto);
+        //이미지 정보 s3에 업로드후, 프로필 이미지 추가
+        String image = "";
+        if (!multipartFile.isEmpty()) {
+            image = awsS3Service.uploadFile(multipartFile);
+        }
+
+        newsFeedService.writePost(token, memberId, postsDto,image);
 
         return ResponseEntity.ok().build();
     }

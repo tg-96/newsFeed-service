@@ -12,10 +12,10 @@ repositories {
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+
     // Email
     implementation 'org.springframework.boot:spring-boot-starter-mail'
-    // AWS S3
-    implementation 'io.awspring.cloud:spring-cloud-starter-aws:2.3.1'
+
     //spring security
     implementation 'org.springframework.boot:spring-boot-starter-security'
     testImplementation 'org.springframework.security:spring-security-test'

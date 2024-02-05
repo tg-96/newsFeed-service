@@ -1,4 +1,4 @@
-package com.preOrderService.service.ExternalService;
+package com.preOrderService.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;

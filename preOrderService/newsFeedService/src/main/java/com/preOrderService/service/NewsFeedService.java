@@ -88,9 +88,9 @@ public class NewsFeedService {
      * 포스트 작성 -> 내 피드, 포스트에 추가,팔로워들의 피드에 포스트 추가
      */
     @Transactional
-    public void writePost(String token, Long memberId, PostsDto postsDto) {
+    public void writePost(String token, Long memberId, PostsDto postsDto,String image) {
         //게시물 생성
-        Posts post = new Posts(postsDto.getContent(), postsDto.getImage(), memberId);
+        Posts post = new Posts(postsDto.getContent(), image, memberId);
         Posts saved_posts = postsRepository.save(post);
 
         //내피드에 추가

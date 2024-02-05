@@ -1,6 +1,6 @@
 package com.preOrderService.api.external;
 
-import com.preOrderService.service.ExternalService.MailService;
+import com.preOrderService.service.MailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;

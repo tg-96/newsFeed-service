@@ -6,7 +6,6 @@ import com.preOrderService.newsFeed.dto.FeedsDto;
 import com.preOrderService.dto.JoinDto;
 import com.preOrderService.newsFeed.dto.PostsDto;
 import com.preOrderService.newsFeed.service.NewsFeedService;
-import com.preOrderService.service.ExternalService.MemberService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
