@@ -30,7 +30,6 @@ public class ActivityService {
      * 팔로워들의 활동에 추가
      */
     public void addFollowerActivities(RequestActivitiesDto request,Long userId){
-        System.out.println("request = " + request + ", userId = " + userId);
         //활동 타입 결정
         defineActivityType(request);
 
@@ -62,7 +61,6 @@ public class ActivityService {
                 request.getFromUserName(),
                 null
         );
-        System.out.println("activity = " + activity.toString());
 
 
         String notification ="";

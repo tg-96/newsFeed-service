@@ -40,7 +40,6 @@ public class MemberService {
     @Transactional
     public void updatePassword(String password,Long id){
         Member member = memberRepository.findById(id).get();
-        System.out.println("member = " + member);
         member.changePassword(bCryptPasswordEncoder.encode(password));
     }
 
@@ -67,7 +66,6 @@ public class MemberService {
         String role = joinDto.getRole();
 
         Optional<Member> member = memberRepository.findByEmail(email);
-        System.out.println(member);
         // 가입한 적이 있는 이메일이면
         if (!member.isEmpty()) {
             throw new RuntimeException("가입 오류: 이미 가입한 적이 있는 이메일 입니다.");
