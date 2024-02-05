@@ -28,11 +28,11 @@ public class Activities extends BaseTimeEntity {
         this.toUserName = toUserName;
 
         switch (type){
-            case FOLLOWS -> notification = fromUserName+"님이 "+toUserName+"을 팔로우 했습니다.";
+            case FOLLOWS -> notification = fromUserName+"님이 "+toUserName+"님을 팔로우 했습니다.";
             case COMMENTS -> notification = fromUserName+"님이 "+toUserName+"님의 글에 댓글을 작성했습니다.";
             case COMMENT_LIKE -> notification = fromUserName+"님이 "+toUserName+"님의 댓글을 좋아합니다.";
             case POSTS -> notification = fromUserName+"님이 게시물을 작성 했습니다.";
-            case POST_LIKES -> notification = fromUserName+"님이 "+toUserName+"님의 글을 좋아합니다.";
+            case POST_LIKE -> notification = fromUserName+"님이 "+toUserName+"님의 글을 좋아합니다.";
         }
     }
     // 내 포스트에 댓글을 작성했을 경우 notificaion 변경

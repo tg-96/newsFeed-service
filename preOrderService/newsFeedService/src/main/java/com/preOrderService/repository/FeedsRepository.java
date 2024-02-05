@@ -8,6 +8,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface FeedsRepository extends JpaRepository<Feeds, Long> {
-    @Query("select f from Feeds f where f.owner.id = :memberId order by f.createdDate desc")
+    @Query("select f from Feeds f where f.memberId = :memberId order by f.createdDate desc")
     List<Feeds> findByOwner(@Param("memberId") Long memberId);
 }

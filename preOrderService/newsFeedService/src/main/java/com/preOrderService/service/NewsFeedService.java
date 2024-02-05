@@ -2,16 +2,12 @@ package com.preOrderService.service;
 
 import com.preOrderService.dto.*;
 import com.preOrderService.entity.*;
-import com.preOrderService.newsFeed.dto.*;
-import com.preOrderService.newsFeed.entity.*;
-import com.preOrderService.newsFeed.repository.*;
 import com.preOrderService.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -25,7 +21,6 @@ public class NewsFeedService {
     private final CommentsRepository commentsRepository;
     private final PostLikesRepository postLikesRepository;
     private final CommentLikesRepository commentLikesRepository;
-    private final ToMemberService toMemberService;
     private final ToActivityService toActivityService;
 
     /**
@@ -50,10 +45,9 @@ public class NewsFeedService {
 
             //팔로워 조회
             List<Long> followerIdList = followRepository.findFollowerList(fromMemberId);
-            //멤버 이름 조회
-            String fromMemberName = toMemberService.getMemberNameById(token, fromMemberId);
-            String toMemberName = toMemberService.getMemberNameById(token, toMemberId);
-            toActivityService.addActivities(token, followerIdList, fromMemberName, toMemberName, "FOLLOWS");
+
+            toActivityService.addActivitiesToFollowers(token, followerIdList, fromMemberId, toMemberId, "FOLLOWS");
+            toActivityService.addActivityToOwner(token,toMemberId,fromMemberId,"FOLLOWS");
         }
     }
     /**
@@ -104,6 +98,7 @@ public class NewsFeedService {
         feedsRepository.save(feed);
 
         /**
+         * TODO
          * bulk 쿼리연산으로 수정
          */
         //내 팔로워들의 피드에 추가
@@ -111,11 +106,8 @@ public class NewsFeedService {
         followerIdList.stream().forEach(id -> {
             feedsRepository.save(new Feeds(saved_posts, id));
 
-            //현재 로그인한 멤버 이메일
-            String fromMemberName = toMemberService.getMemberNameById(token, memberId);
-
             //내 팔로워들의 활동에 추가
-            toActivityService.addActivities(token, followerIdList, fromMemberName, null, "POSTS");
+            toActivityService.addActivitiesToFollowers(token, followerIdList, memberId, null, "POSTS");
         });
     }
 
@@ -137,18 +129,14 @@ public class NewsFeedService {
             // 팔로워 조회
             List<Long> followerList = followRepository.findFollowerList(fromMemberId);
 
-            //작성자 이름
-            String fromMemberName = toMemberService.getMemberNameById(token,fromMemberId);
-
             //게시글 주인 이름
             Long toMemberId = post.get().getWriteMemberId();
-            String toMemberName = toMemberService.getMemberNameById(token,toMemberId);
 
             //팔로워들의 활동에 추가
-            toActivityService.addActivities(token,followerList,fromMemberName,toMemberName,"COMMENTS");
+            toActivityService.addActivitiesToFollowers(token,followerList,fromMemberId,toMemberId,"COMMENTS");
 
             //게시물 주인의 활동에 추가
-            toActivityService.addActivityToOwner(token,toMemberId,fromMemberName,"COMMENTS");
+            toActivityService.addActivityToOwner(token,toMemberId,fromMemberId,"COMMENTS");
             return save.getId();
         }
 
@@ -167,24 +155,24 @@ public class NewsFeedService {
          * 게시글 좋아요
          */
         @Transactional
-        public void postLike (String token,Long memberId, Long postId){
+        public void postLike (String token,Long fromMemberId, Long postId){
             Optional<Posts> post = postsRepository.findById(postId);
             if (post.isEmpty()) {
                 throw new RuntimeException("좋아요한 게시글이 존재하지 않습니다.");
             }
 
             //좋아요 저장
-            PostLikes postLikes = new PostLikes(post.get(), memberId);
+            PostLikes postLikes = new PostLikes(post.get(), fromMemberId);
             postLikesRepository.save(postLikes);
 
             //좋아요 활동 팔로워에 남기기
-            List<Long> followerList = followRepository.findFollowerList(memberId);
-            String fromUserName = toMemberService.getMemberNameById(token,memberId);
-            String toUserName = toMemberService.getMemberNameById(token,post.get().getWriteMemberId());
-            toActivityService.addActivities(token,followerList,fromUserName,toUserName,"POST_LIKES");
+            List<Long> followerList = followRepository.findFollowerList(fromMemberId);
+
+            Long toMemberId = post.get().getWriteMemberId();
+            toActivityService.addActivitiesToFollowers(token,followerList,fromMemberId,toMemberId,"POST_LIKES");
 
             //게시글 주인 활동에 남기기
-            toActivityService.addActivityToOwner(token,post.get().getWriteMemberId(),fromUserName,"POST_LIKES");
+            toActivityService.addActivityToOwner(token,post.get().getWriteMemberId(),fromMemberId,"POST_LIKES");
         }
 
         /**
@@ -202,35 +190,24 @@ public class NewsFeedService {
          * 댓글 좋아요
          */
         @Transactional
-        public Long commentLike (Long commentsId, String email){
-            Optional<Comments> comment = commentsRepository.findById(commentsId);
-            if (comment.isEmpty()) {
+        public void commentLike (String token,Long commentId, Long fromMemberId){
+            //댓글 좋아요 저장
+            Optional<Comments> comment = commentsRepository.findById(commentId);
+            if(comment.isEmpty()){
                 throw new RuntimeException("좋아요한 댓글이 존재하지 않습니다.");
             }
-            Optional<Member> member = memberRepository.findByEmail(email);
-            if (member.isEmpty()) {
-                throw new RuntimeException("좋아요한 회원이 존재하지 않습니다.");
-            }
 
-            //댓글 좋아요 저장
-            CommentLikes commentLikes = new CommentLikes(comment.get(), member.get());
-            CommentLikes save = commentLikesRepository.save(commentLikes);
+            CommentLikes commentLikes = new CommentLikes(comment.get(), fromMemberId);
+            commentLikesRepository.save(commentLikes);
 
-            //댓글 좋아요, 팔로워 활동에 남기기
-            List<Long> followerList = followRepository.findFollowerList(member.get().getId());
-            followerList.stream().forEach(id ->
-                    memberRepository.findById(id).ifPresent(m -> {
-                        Activities activities = new Activities(m, ActivityType.COMMENT_LIKE, email, comment.get().getWriteMemberId().getEmail());
-                        activitiesRepository.save(activities);
-                    })
-            );
+            //팔로워 활동에 남기기
+            List<Long> followerList = followRepository.findFollowerList(fromMemberId);
+
+            Long toMemberId = comment.get().getWriteMemberId();
+            toActivityService.addActivitiesToFollowers(token,followerList,fromMemberId,toMemberId,"COMMENT_LIKE");
 
             //댓글 주인의 활동에 남기기
-            Activities activities = new Activities(comment.get().getWriteMemberId(), ActivityType.COMMENT_LIKE, email, comment.get().getWriteMemberId().getEmail());
-            String notification = email + "님이 내 댓글을 좋아합니다.";
-            activitiesRepository.save(activities);
-
-            return save.getId();
+            toActivityService.addActivityToOwner(token,comment.get().getWriteMemberId(),fromMemberId,"COMMENT_LIKE");
         }
 
         /**
@@ -238,14 +215,9 @@ public class NewsFeedService {
          */
         public List<CommentLikesDto> findCommentLike (Long commentId){
             List<CommentLikes> commentLikesList = commentLikesRepository.findCommentLikesByCommentsId(commentId);
-            Optional<Comments> comments = commentsRepository.findById(commentId);
-
-            int count = commentLikesList.size();
 
             return commentLikesList.stream()
-                    .map(cl -> new CommentLikesDto(commentId, comments.get().getWriteMemberId().getEmail(), count))
+                    .map(cl -> new CommentLikesDto(commentId, cl.getLikeMemberId()))
                     .collect(Collectors.toList());
         }
-
-
     }

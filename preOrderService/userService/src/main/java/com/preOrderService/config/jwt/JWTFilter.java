@@ -33,7 +33,12 @@ public class JWTFilter extends OncePerRequestFilter {
             return;
         }
         //Bearer 부분 제거, 순수 토큰만 획득
-        String token = authorization.split(" ")[1];
+        String token = "";
+        if (authorization != null && authorization.startsWith("Bearer ")) {
+            token = authorization.substring("Bearer ".length()).trim();
+            // 토큰 사용
+        }
+
         System.out.println("token = " + token);
         //토큰 소멸 시간 검증
         if(jwtUtil.isExpired(token)){
@@ -43,15 +48,15 @@ public class JWTFilter extends OncePerRequestFilter {
 
             return;
         }
-        //토큰에서 username, role 획득
-        String username = jwtUtil.getUsername(token);
+        //토큰에서 memberId, role 획득
+        Long memberId = jwtUtil.getUserId(token);
         String role = jwtUtil.getRole(token);
         System.out.println("role = " + role);
 
 
         //member를 생성하여 값 set
         Member member = Member.builder()
-                .email(username)
+                .id(memberId)
                 .password("temp")
                 .build();
         member.changeRole(role);

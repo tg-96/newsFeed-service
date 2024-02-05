@@ -17,16 +17,16 @@ import java.util.Optional;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    public MemberDto findMember(String email){
-        Optional<Member> member = memberRepository.findByEmail(email);
+    public MemberDto findMember(Long userId){
+        Optional<Member> member = memberRepository.findById(userId);
         if(member.isEmpty()){
             throw new RuntimeException("조회한 멤버 정보가 없습니다.");
         }
         return new MemberDto(member.get().getName(),member.get().getImage(),member.get().getIntroduction());
     }
     @Transactional
-    public void updateProfile(MemberDto memberDto,String email){
-        Member member = memberRepository.findByEmail(email).get();
+    public void updateProfile(MemberDto memberDto,Long userId){
+        Member member = memberRepository.findById(userId).get();
         if(memberDto.getImage() != null){
             member.changeImg(memberDto.getImage());
         }
@@ -38,8 +38,9 @@ public class MemberService {
         }
     }
     @Transactional
-    public void updatePassword(String password,String email){
-        Member member = memberRepository.findByEmail(email).get();
+    public void updatePassword(String password,Long id){
+        Member member = memberRepository.findById(id).get();
+        System.out.println("member = " + member);
         member.changePassword(bCryptPasswordEncoder.encode(password));
     }
 
@@ -72,7 +73,7 @@ public class MemberService {
             throw new RuntimeException("가입 오류: 이미 가입한 적이 있는 이메일 입니다.");
         }
         // 가입 진행
-        Member newMember = new Member(name, email, bCryptPasswordEncoder.encode(password),role);
+        Member newMember = new Member(null, name, email, bCryptPasswordEncoder.encode(password), role);
         memberRepository.save(newMember);
     }
 

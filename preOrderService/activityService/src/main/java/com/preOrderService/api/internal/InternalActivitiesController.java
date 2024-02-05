@@ -22,8 +22,11 @@ public class InternalActivitiesController {
      * ex) 희찬: 흥민님이 강인님의 게시물에 댓글을 달았습니다.
      */
     @PostMapping("/activities")
-    public ResponseEntity<Void> addActivities(@RequestBody RequestActivitiesDto request) {
-        activityService.addFollowerActivities(request);
+    public ResponseEntity<Void> addActivities(@RequestHeader("Authorization")String token,
+                                              @RequestBody RequestActivitiesDto request) {
+        String parse_token = jwtUtil.parser(token);
+        Long userId = jwtUtil.getUserId(parse_token);
+        activityService.addFollowerActivities(request,userId);
         return ResponseEntity.ok().build();
     }
 

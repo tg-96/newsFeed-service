@@ -23,11 +23,14 @@ public class ExternalNewsFeedController {
      */
     @PostMapping("/follow")
     public ResponseEntity<Void> follow(@RequestBody RequestMemberDto request, @RequestHeader("Authorization") String token) {
+        String parse_token = jwtUtil.parser(token);
+
         //유효기간 만료확인
-        if (jwtUtil.isExpired(token)) {
+        if (jwtUtil.isExpired(parse_token)) {
             throw new RuntimeException("토큰이 유효하지 않습니다.");
         }
-        Long fromMemberId = jwtUtil.getUserId(token);
+
+        Long fromMemberId = jwtUtil.getUserId(parse_token);
         Long toMemberId = request.getMemberId();
 
         newsFeedService.changeFollow(token, fromMemberId, toMemberId);
@@ -40,12 +43,12 @@ public class ExternalNewsFeedController {
      */
     @GetMapping
     public List<FeedsDto> getNewsFeeds(@RequestHeader("Authorization") String token) {
+        String parse_token = jwtUtil.parser(token);
         //토큰 유효성 검증
-        if (jwtUtil.isExpired(token)) {
+        if (jwtUtil.isExpired(parse_token)) {
             throw new RuntimeException("토큰이 유효하지 않습니다.");
         }
-
-        Long memberId = jwtUtil.getUserId(token);
+        Long memberId = jwtUtil.getUserId(parse_token);
 
         //뉴스피드 조회
         List<FeedsDto> newsFeeds = newsFeedService.getFeeds(memberId);
@@ -59,12 +62,14 @@ public class ExternalNewsFeedController {
      */
     @PostMapping("/posts")
     public ResponseEntity<Void> writePost(@RequestBody PostsDto postsDto, @RequestHeader("Authorization") String token) {
+        String parse_token = jwtUtil.parser(token);
+
         //토큰 유효성 검증
-        if (jwtUtil.isExpired(token)) {
+        if (jwtUtil.isExpired(parse_token)) {
             throw new RuntimeException("토큰이 유효하지 않습니다.");
         }
 
-        Long memberId = jwtUtil.getUserId(token);
+        Long memberId = jwtUtil.getUserId(parse_token);
 
         newsFeedService.writePost(token, memberId, postsDto);
 
@@ -78,11 +83,13 @@ public class ExternalNewsFeedController {
     public ResponseEntity<Void> writeComments(@RequestHeader("Authorization") String token,
                                               @PathVariable("postId") Long postId,
                                               @RequestBody CommentsDto commentsDto) {
-        if (jwtUtil.isExpired(token)) {
+        String parse_token = jwtUtil.parser(token);
+
+        if (jwtUtil.isExpired(parse_token)) {
             throw new RuntimeException("토큰이 유효하지 않습니다.");
         }
 
-        Long memberId = jwtUtil.getUserId(token);
+        Long memberId = jwtUtil.getUserId(parse_token);
 
         newsFeedService.writeComments(token, memberId, postId, commentsDto);
 
@@ -95,7 +102,9 @@ public class ExternalNewsFeedController {
     @GetMapping("/comments/{postId}")
     public List<CommentsResponseDto> findComments(@RequestHeader("Authorization") String token,
                                                   @PathVariable("postId") Long postId) {
-        if (jwtUtil.isExpired(token)) {
+        String parse_token = jwtUtil.parser(token);
+
+        if (jwtUtil.isExpired(parse_token)) {
             throw new RuntimeException("토큰이 유효하지 않습니다.");
         }
 
@@ -108,11 +117,13 @@ public class ExternalNewsFeedController {
     @PostMapping("/posts/like/{postId}")
     public ResponseEntity<Void> postLike(@RequestHeader("Authorization") String token,
                                          @PathVariable("postId") Long postId) {
-        if (jwtUtil.isExpired(token)) {
+        String parse_token = jwtUtil.parser(token);
+
+        if (jwtUtil.isExpired(parse_token)) {
             throw new RuntimeException("토큰이 유효하지 않습니다.");
         }
 
-        Long memberId = jwtUtil.getUserId(token);
+        Long memberId = jwtUtil.getUserId(parse_token);
 
         newsFeedService.postLike(token, memberId, postId);
         return ResponseEntity.ok().build();
@@ -124,7 +135,9 @@ public class ExternalNewsFeedController {
     @GetMapping("/posts/like/{postId}")
     public List<PostLikesDto> findPostLikes(@RequestHeader("Authorization") String token,
                                             @PathVariable("postId") Long postId) {
-        if (jwtUtil.isExpired(token)) {
+        String parse_token = jwtUtil.parser(token);
+
+        if (jwtUtil.isExpired(parse_token)) {
             throw new RuntimeException("토큰이 유효하지 않습니다.");
         }
 
@@ -132,21 +145,36 @@ public class ExternalNewsFeedController {
     }
 
     /**
-     * 댓글별 좋아요 조회
-     */
-    @GetMapping("/comments/like/{commentId}")
-    public List<CommentLikesDto> findCommentLikes(@PathVariable("commentId") Long commentId) {
-        return newsFeedService.findCommentLike(commentId);
-    }
-
-    /**
      * 댓글 좋아요
      */
     @PostMapping("/comments/like/{commentId}")
-    public ResponseEntity<Void> commentLike(@PathVariable("commentId") Long commentId) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        newsFeedService.commentLike(commentId, email);
+    public ResponseEntity<Void> commentLike(@RequestHeader("Authorization") String token,
+                                            @PathVariable("commentId") Long commentId) {
+        String parse_token = jwtUtil.parser(token);
+
+        if (jwtUtil.isExpired(parse_token)) {
+            throw new RuntimeException("토큰이 유효하지 않습니다.");
+        }
+
+        Long memberId = jwtUtil.getUserId(parse_token);
+
+        newsFeedService.commentLike(token, commentId, memberId);
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 댓글별 좋아요 조회
+     */
+    @GetMapping("/comments/like/{commentId}")
+    public List<CommentLikesDto> findCommentLikes(@RequestHeader("Authorization") String token,
+                                                  @PathVariable("commentId") Long commentId) {
+        String parse_token = jwtUtil.parser(token);
+
+        if (jwtUtil.isExpired(parse_token)) {
+            throw new RuntimeException("토큰이 유효하지 않습니다.");
+        }
+
+        return newsFeedService.findCommentLike(commentId);
     }
 
 }

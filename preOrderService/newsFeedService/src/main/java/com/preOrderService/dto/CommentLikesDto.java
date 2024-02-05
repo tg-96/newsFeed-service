@@ -9,6 +9,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CommentLikesDto {
     private Long commentId;
-    private String likersEmail;
-    private int count;
+    private Long likeMemberId;
 }

@@ -1,7 +1,10 @@
 package com.preOrderService.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Getter
@@ -19,29 +22,33 @@ public class Member extends BaseTimeEntity {
     private String image;
     private String introduction;
 
-   @Builder
-    public Member(String name,String email, String password,String role) {
+    @Builder
+    public Member(Long id, String name, String email, String password, String role) {
+        this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
     }
 
-    public void changeRole(String role){
-       this.role = role;
+    public void changeRole(String role) {
+        this.role = role;
     }
 
-    public void changeName(String name){
-       this.name = name;
+    public void changeName(String name) {
+        this.name = name;
     }
-    public void changeImg(String img){
-       this.image = img;
+
+    public void changeImg(String img) {
+        this.image = img;
     }
-    public void changeIntroduction(String introduction){
-       this.introduction = introduction;
+
+    public void changeIntroduction(String introduction) {
+        this.introduction = introduction;
     }
-    public void changePassword(String password){
-       this.password = password;
+
+    public void changePassword(String password) {
+        this.password = password;
     }
 
 }

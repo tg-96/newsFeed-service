@@ -41,4 +41,7 @@ public class JWTUtil {
                 .getBody()
                 .getExpiration().before(new Date());
     }
+    public String parser(String token) {
+        return token.substring("Bearer ".length()).trim();
+    }
 }
