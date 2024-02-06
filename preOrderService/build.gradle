@@ -77,3 +77,10 @@ project(':newsFeedService'){
     }
 }
 
+project(':gateway'){
+    bootJar {enabled= true}
+    jar {enabled = false}
+
+    dependencies {
+    }
+}

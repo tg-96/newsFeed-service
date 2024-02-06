@@ -14,7 +14,7 @@ public class ExternalMailController {
     /**
      * 메일로 인증번호 보냄
      */
-    @PostMapping("/mail/{mail}")
+    @PostMapping("/api/mail/{mail}")
     public String MailSend(@PathVariable("mail") String mail){
         int number = mailService.sendMail(mail);
         String num = ""+number;
