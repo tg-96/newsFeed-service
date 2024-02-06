@@ -23,7 +23,7 @@
 //    public void 회원가입(){
 //        //given
 //        JoinDto joinDto = new JoinDto();
-//        joinDto.setEmail("aaa@bbb");
+//        joinDto.setEmail("aaa@bbb");ㅌ
 //        joinDto.setName("진구");
 //        joinDto.setRole("ADMIN");
 //        joinDto.setPassword("123");
