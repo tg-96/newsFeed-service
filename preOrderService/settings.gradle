@@ -4,4 +4,5 @@ include 'activityService'
 include 'newsFeedService'
 include 'commonService'
 include 'gateway'
+include 'urekaServer'
 

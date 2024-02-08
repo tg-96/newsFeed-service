@@ -2,31 +2,33 @@ server:
   port: 8083
 
 spring:
+  application:
+    name: api-gateway
   cloud:
     gateway:
       routes:
-        - id: memberServiceAPI
-          uri: http://localhost:8080
+        - id: api-memberService
+          uri: lb://API-USERSERVICE
           predicates:
             - Path=/api/member/**
 
-        - id: loginServiceAPI
-          uri: http://localhost:8080
+        - id: api-loginService
+          uri: lb://API-USERSERVICE
           predicates:
             - Path=/login
 
-        - id: mailServiceAPI
-          uri: http://localhost:8080
+        - id: api-mailService
+          uri: lb://API-USERSERVICE
           predicates:
             - Path=/api/mail/**
 
-        - id: activityServiceAPI
-          uri: http://localhost:8081
+        - id: api-activityService
+          uri: lb://API-ACTIVITYSERVICE
           predicates:
             - Path=/api/activities/**
 
-        - id: newsFeedServiceAPI
-          uri: http://localhost:8082
+        - id: api-newsFeedService
+          uri: lb://API-NEWSFEEDSERVICE
           predicates:
             - Path=/api/newsFeed/**
   main:
@@ -36,3 +38,9 @@ logging:
   level:
     org.springframework.cloud.gateway: DEBUG
     reactor.netty.http.server: DEBUG
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    prefer-ip-address: true

@@ -29,7 +29,7 @@ public class ActivityService {
     /**
      * 팔로워들의 활동에 추가
      */
-    public void addFollowerActivities(RequestActivitiesDto request,Long userId){
+    public void addFollowerActivities(RequestActivitiesDto request){
         //활동 타입 결정
         defineActivityType(request);
 
