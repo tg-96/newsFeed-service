@@ -1,5 +1,6 @@
 package com.preOrderService.service;
 
+import com.preOrderService.dto.MemberResponseDto;
 import com.preOrderService.entity.Member;
 import com.preOrderService.dto.JoinDto;
 import com.preOrderService.dto.MemberDto;
@@ -17,12 +18,15 @@ import java.util.Optional;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    public MemberDto findMember(Long userId){
-        Optional<Member> member = memberRepository.findById(userId);
-        if(member.isEmpty()){
-            throw new RuntimeException("조회한 멤버 정보가 없습니다.");
-        }
-        return new MemberDto(member.get().getName(),member.get().getImage(),member.get().getIntroduction());
+
+    /**
+     * 프로필 조회
+     */
+    public MemberResponseDto getProfile(Long userId){
+        Member member = memberRepository.findById(userId).orElseThrow(() -> new RuntimeException("조회한 멤버 정보가 없습니다."));
+
+        return new MemberResponseDto(userId,member.getName(),member.getEmail(),member.getImage(),member.getIntroduction());
+
     }
     @Transactional
     public void updateProfile(MemberDto memberDto,Long userId){
@@ -43,13 +47,6 @@ public class MemberService {
         member.changePassword(bCryptPasswordEncoder.encode(password));
     }
 
-    public Member findMemberByEmail(String email){
-        Optional<Member> member = memberRepository.findByEmail(email);
-        if(member.isEmpty()){
-            throw new RuntimeException("해당 이메일로 등록된 회원이 없습니다.");
-        }
-        return member.get();
-    }
     public String findMemberNameById(Long memberId){
         Optional<Member> member = memberRepository.findById(memberId);
         if(member.isEmpty()){

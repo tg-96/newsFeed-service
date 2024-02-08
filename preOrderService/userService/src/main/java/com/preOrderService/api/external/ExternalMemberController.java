@@ -3,6 +3,7 @@ package com.preOrderService.api.external;
 import com.preOrderService.config.jwt.JWTUtil;
 import com.preOrderService.dto.JoinDto;
 import com.preOrderService.dto.MemberDto;
+import com.preOrderService.dto.MemberResponseDto;
 import com.preOrderService.dto.PwdUpdateDto;
 import com.preOrderService.service.AwsS3Service;
 import com.preOrderService.service.MemberService;
@@ -20,10 +21,10 @@ public class ExternalMemberController {
     private final JWTUtil jwtUtil;
 
     /**
-     * 회원 정보 조회
+     * 프로필 조회
      */
     @GetMapping
-    public MemberDto findMember(@RequestHeader("Authorization") String token) {
+    public MemberResponseDto findMember(@RequestHeader("Authorization") String token) {
         String parse_token = jwtUtil.parser(token);
         //토큰 유효기간 확인
         if (jwtUtil.isExpired(parse_token)) {
@@ -32,12 +33,10 @@ public class ExternalMemberController {
 
         Long userId = jwtUtil.getUserId(parse_token);
 
-        return memberService.findMember(userId);
-
+        return memberService.getProfile(userId);
     }
-
     /**
-     * 유저 정보 업데이트
+     * 프로필 업데이트
      */
     @PatchMapping
     public ResponseEntity<Void> updateMember(@RequestPart(value = "memberDto") MemberDto memberDto,
