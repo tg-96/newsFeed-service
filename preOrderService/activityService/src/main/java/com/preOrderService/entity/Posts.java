@@ -1,6 +1,5 @@
 package com.preOrderService.entity;
 
-import com.preOrderService.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,11 +15,11 @@ public class Posts extends BaseTimeEntity {
     private Long id;
     private String content;
     private String image;
-    private Long writeMemberId;
+    private Long writerId;
     @Builder
-    public Posts(String content, String image, Long writeMemberId) {
+    public Posts(String content, String image, Long writerId) {
         this.content = content;
         this.image = image;
-        this.writeMemberId = writeMemberId;
+        this.writerId = writerId;
     }
 }

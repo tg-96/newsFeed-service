@@ -1,4 +1,4 @@
-package com.preOrderService.dto;
+package com.preOrderService.dto.request;
 
 import lombok.*;
 

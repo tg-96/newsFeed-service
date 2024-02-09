@@ -1,4 +1,4 @@
-package com.preOrderService.common;
+package com.preOrderService.entity;
 
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;

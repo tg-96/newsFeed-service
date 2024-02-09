@@ -1,12 +1,14 @@
-package com.preOrderService.dto;
+package com.preOrderService.dto.response;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class FeedsDto {
+public class ResponsePostDto {
     private String text;
     private Long writerId;
     private String image;
@@ -14,7 +16,7 @@ public class FeedsDto {
     private LocalDateTime updateDate;
 
     @Builder
-    public FeedsDto(String text, Long writerId, String image, LocalDateTime createDate, LocalDateTime updateDate) {
+    public ResponsePostDto(String text, Long writerId, String image, LocalDateTime createDate, LocalDateTime updateDate) {
         this.text = text;
         this.writerId = writerId;
         this.image = image;

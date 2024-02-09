@@ -1,6 +1,5 @@
 package com.preOrderService.entity;
 
-import com.preOrderService.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,14 +13,12 @@ public class Comments extends BaseTimeEntity {
     @Column(name = "comment_id")
     private Long id;
     private String text;
-    private Long writeMemberId;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
-    private Posts posts;
-    public Comments(Long writeMemberId, Posts post,String text) {
+    private Long writerId;
+    private Long postId;
+    public Comments(Long writerId, Long postId,String text) {
         this.text = text;
-        this.writeMemberId = writeMemberId;
-        this.posts = post;
+        this.writerId = writerId;
+        this.postId = postId;
     }
 }
 

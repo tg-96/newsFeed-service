@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class PostLikesDto {
-    private Long PostId;
-    private Long likeMemberId;
+public class CommentLikesDto {
+    private Long commentId;
+    private Long actorId;
 }

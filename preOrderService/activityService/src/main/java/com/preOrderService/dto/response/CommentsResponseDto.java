@@ -1,4 +1,4 @@
-package com.preOrderService.dto;
+package com.preOrderService.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,6 +9,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CommentsResponseDto {
     private Long commentsId;
-    private Long writeMemberId;
+    private Long writerId;
     private String text;
 }

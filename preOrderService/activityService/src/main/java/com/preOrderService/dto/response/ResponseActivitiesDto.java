@@ -1,4 +1,4 @@
-package com.preOrderService.dto;
+package com.preOrderService.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

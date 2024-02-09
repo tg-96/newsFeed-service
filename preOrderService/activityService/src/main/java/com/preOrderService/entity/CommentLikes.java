@@ -12,13 +12,11 @@ public class CommentLikes {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "commentLike_id")
     private Long id;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "comment_id")
-    private Comments comments;
-    private Long likeMemberId;
+    private Long commentId;
+    private Long actorId;
 
-    public CommentLikes(Comments comments,Long likeMemberId) {
-        this.comments = comments;
-        this.likeMemberId = likeMemberId;
+    public CommentLikes(Long commentId,Long actorId) {
+        this.commentId = commentId;
+        this.actorId = actorId;
     }
 }

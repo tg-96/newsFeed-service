@@ -1,4 +1,4 @@
-package com.preOrderService.dto;
+package com.preOrderService.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CommentsDto {
+public class RequestCommentsDto {
+    private Long postId;
     private String text;
 }
