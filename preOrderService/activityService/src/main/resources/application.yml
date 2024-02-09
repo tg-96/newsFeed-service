@@ -14,6 +14,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
+#Mail
   mail:
     host: smtp.gmail.com
     port: 465
@@ -28,13 +29,14 @@ spring:
             enable: true
     protocol: smtps
 
-  #file upload max size (파일 업로드 크기 설정)
+#file upload max size (파일 업로드 크기 설정)
   servlet:
     multipart:
       max-file-size: 20MB
       max-request-size: 20MB
   application:
     name: api-activityService
+
 #jwt secret 키
 jwt:
   secret: ${SECRET_KEY}
@@ -46,7 +48,7 @@ cloud:
       accessKey: ${ACCESS_KEY}
       secretKey: ${S3_SECRET_KEY}
 
-      #AWS S3 bucket Info ( S3 버킷정보)
+#AWS S3 bucket Info ( S3 버킷정보)
     s3:
       bucket: preorder-service-bucket
     region:
@@ -65,3 +67,28 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
   instance:
     prefer-ip-address: true
+
+# resilience4j 설정
+resilience4j:
+  circuitbreaker:
+    instances:
+      test:
+        sliding-window-size: 10
+#        circuitbreaker가 상태 계산하기 위해 필요한 최소 수
+        minimum-number-of-calls: 20
+        wait-duration-in-open-state:
+          seconds: 10
+        failure-rate-threshold: 50
+#        permitted-number-of-calls-in-half-open-state: 100
+  retry:
+    instances:
+      test:
+        max-attempts: 3
+        wait-duration:
+          seconds: 5
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 1.5
+
+
+
+

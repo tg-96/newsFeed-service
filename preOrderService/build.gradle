@@ -38,7 +38,13 @@ subprojects {
         runtimeOnly 'com.mysql:mysql-connector-j'
         implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+        //resilience4j
+        implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
+        implementation 'org.springframework.boot:spring-boot-starter-aop'
+        implementation 'io.github.resilience4j:resilience4j-all'
 
+        //open-feign
+        implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
         // AWS S3
         implementation 'io.awspring.cloud:spring-cloud-starter-aws:2.3.1'
@@ -48,6 +54,17 @@ subprojects {
         runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
         runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
+
+    }
+
+    ext {
+        set('springCloudVersion', "2023.0.0")
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        }
     }
 
     test {
@@ -55,33 +72,33 @@ subprojects {
     }
 }
 
-project(':userService'){
-    bootJar {enabled= true}
-    jar {enabled = false}
+project(':userService') {
+    bootJar { enabled = true }
+    jar { enabled = false }
 
     dependencies {
     }
 }
 
-project(':activityService'){
-    bootJar {enabled= true}
-    jar {enabled = false}
+project(':activityService') {
+    bootJar { enabled = true }
+    jar { enabled = false }
 
     dependencies {
     }
 }
 
-project(':newsFeedService'){
-    bootJar {enabled= true}
-    jar {enabled = false}
+project(':newsFeedService') {
+    bootJar { enabled = true }
+    jar { enabled = false }
 
     dependencies {
     }
 }
 
-project(':gateway'){
-    bootJar {enabled= true}
-    jar {enabled = false}
+project(':gateway') {
+    bootJar { enabled = true }
+    jar { enabled = false }
 
     dependencies {
     }
