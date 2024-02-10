@@ -73,21 +73,20 @@ resilience4j:
   circuitbreaker:
     instances:
       test:
-        sliding-window-size: 10
+        # 마지막 window-size로 상태 파악
+        sliding-window-size: 100
 #        circuitbreaker가 상태 계산하기 위해 필요한 최소 수
-        minimum-number-of-calls: 20
+        minimum-number-of-calls: 10
         wait-duration-in-open-state:
           seconds: 10
-        failure-rate-threshold: 50
-#        permitted-number-of-calls-in-half-open-state: 100
+        failure-rate-threshold: 30
+        permitted-number-of-calls-in-half-open-state: 10
   retry:
     instances:
       test:
-        max-attempts: 3
+        max-attempts: 10
         wait-duration:
-          seconds: 5
-        enable-exponential-backoff: true
-        exponential-backoff-multiplier: 1.5
+          seconds: 1
 
 
 

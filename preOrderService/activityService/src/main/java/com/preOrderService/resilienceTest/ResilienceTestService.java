@@ -2,23 +2,19 @@ package com.preOrderService.resilienceTest;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
-import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.concurrent.CompletableFuture;
 
 @RestController
 public class ResilienceTestService {
 
     @Autowired
-    private ResilienceTestClient errorSimulationClient;
+    private ResilienceTestClient resilienceTestClient;
 
     /**
      * 5%의 확률로 에러 발생 상황 -> 실패했을때 retry
@@ -30,7 +26,7 @@ public class ResilienceTestService {
         // Case 1 호출
         LocalDateTime start = LocalDateTime.now();
 
-        ResponseEntity<String> response1 = errorSimulationClient.callCase1();
+        ResponseEntity<String> response1 = resilienceTestClient.callCase1();
         System.out.println("Case 1 Response: " + response1.getBody());
 
         LocalDateTime end = LocalDateTime.now();
@@ -54,7 +50,7 @@ public class ResilienceTestService {
         // Case 2 호출
         LocalDateTime start = LocalDateTime.now();
 
-        ResponseEntity<String> response2 = errorSimulationClient.callCase2();
+        ResponseEntity<String> response2 = resilienceTestClient.callCase2();
         System.out.println("Case 2 Response: " + response2.getBody());
 
         LocalDateTime end = LocalDateTime.now();
@@ -72,14 +68,14 @@ public class ResilienceTestService {
      * 매분의 10초까지 500에러 반환.
      * 특정 시간대에 에러 발생
      */
-    @CircuitBreaker(name = "test",fallbackMethod = "fallback")
-    @Retry(name = "test")
-    @Scheduled(fixedRate = 500)
+    @CircuitBreaker(name = "test")
+    @Retry(name = "test",fallbackMethod = "fallback")
+//    @Scheduled(fixedRate = 100)
     public void simulationErrors3(){
         // Case 3 호출
         LocalDateTime start = LocalDateTime.now();
 
-        ResponseEntity<String> response3 = errorSimulationClient.callCase3();
+        ResponseEntity<String> response3 = resilienceTestClient.callCase3();
         System.out.println("Case 3 Response: " + response3.getBody());
 
         LocalDateTime end = LocalDateTime.now();
