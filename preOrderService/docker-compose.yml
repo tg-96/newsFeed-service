@@ -16,9 +16,21 @@ services:
       - ./db/mysql/data:/var/lib/mysql
       - ./db/mysql/config:/etc/mysql/conf.d
       - ./db/mysql/init:/docker-entrypoint-initdb.d
+
   adminer_container:
     image: adminer:latest
     environment:
       ADMINER_DEFAULT_SERVER: db
     ports:
       - "80:8080"
+
+  redis:
+    image: redis:alpine
+    command: redis-server --port 79
+    container_name: redis_boot
+    hostname: redis_boot
+    labels:
+      - "name=redis"
+      - "mode=standalone"
+    ports:
+      - "79:79"
