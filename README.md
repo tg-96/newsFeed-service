@@ -32,12 +32,8 @@ docker-compose up -d
 - AWS S3
 
 ## ERD
-### UserService
-![image](https://github.com/tg-96/newsFeed-service/assets/98454438/e8119127-6c01-425c-88fc-d20252140369)
-### FeedService
-![image](https://github.com/tg-96/newsFeed-service/assets/98454438/f6870949-2665-4e0d-a47c-43976903a708)
-### ActivityService
-![image](https://github.com/tg-96/newsFeed-service/assets/98454438/25da1618-5ed7-4dd2-a050-efae14327372)
+![image](https://github.com/tg-96/newsFeed-service/assets/98454438/cdb0d649-abab-4304-a99c-a0001db7d554)
+
 
 ## 모듈별 API
 ### UserService
